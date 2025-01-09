@@ -8,7 +8,7 @@ import jade.domain.FIPAAgentManagement.*;
 import java.net.*;
 import java.io.*;
 
-public class ServiceAgent extends Agent {
+public class MenuAgent extends Agent {
 	protected void setup () {
 		//services registration at DF
 		DFAgentDescription dfad = new DFAgentDescription();
@@ -83,8 +83,8 @@ public class ServiceAgent extends Agent {
 
 class WordnetCyclicBehaviour extends CyclicBehaviour
 {
-	ServiceAgent agent;
-	public WordnetCyclicBehaviour(ServiceAgent agent)
+	MenuAgent agent;
+	public WordnetCyclicBehaviour(MenuAgent agent)
 	{
 		this.agent = agent;
 	}
@@ -119,8 +119,8 @@ class WordnetCyclicBehaviour extends CyclicBehaviour
 
 class DictionaryCyclicBehaviour extends CyclicBehaviour
 {
-	ServiceAgent agent;
-	public DictionaryCyclicBehaviour(ServiceAgent agent)
+	MenuAgent agent;
+	public DictionaryCyclicBehaviour(MenuAgent agent)
 	{
 		this.agent = agent;
 	}
