@@ -22,7 +22,7 @@ public class MenuAgent extends Agent {
 		System.out.println("Menu agent " + getAID().getLocalName() + " terminated.");
 	}
 
-	public double[] getScore() {
+	public int[] getScore() {
 		return score;
 	}
 
