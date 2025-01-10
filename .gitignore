@@ -30,3 +30,6 @@ replay_pid*
 # JADE working files
 APDescription.txt
 MTPs-Main-Container.txt
+
+# workspace files for Visual Studio Code
+GroupAI_PFC.code-workspace
