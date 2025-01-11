@@ -37,13 +37,14 @@ public class MenuAgent extends Agent {
 }
 
 	private class ControllerBehaviour extends Behaviour {
-		int step = 0;
+		private int step = 0;
+		private int repliesCnt = 0;
 
 
 		public void action() {
 			switch (step) {
 				case 0: // Cette partie consiste à envoyer un message à l'agent joueur pour lui demander de jouer
-					ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+					ACLMessage request = new ACLMessage(ACLMessage.REQUEST); // pas sûr du type de message, CFP peut etre aussi très pratique
 					
 					//On ajoute les agents joueurs à la liste des destinataires
 					for (AID playerAgent : playerAgents) {
@@ -54,12 +55,29 @@ public class MenuAgent extends Agent {
 
 					myAgent.send(request);
 					mt = MessageTemplate.MatchInReplyTo(request.getReplyWith());
-					
+
 					step++; // On passe à l'étape suivante
 
 					break;
 
 				case 1: // Cette partie consiste à recevoir le message de l'agent joueur
+
+					ACLMessage reply = myAgent.receive(mt);
+					if (reply != null) {
+						if (reply.getPerformative() == ACLMessage.INFORM) {
+
+							//TODO: Parser la réponse des joueurs
+
+							repliesCnt++;
+							if (repliesCnt == 2) {
+								//all proposals have been received
+								step = 2; 
+							}
+
+						}
+					} else {
+						block();
+					}
 					
 					break;
 
