@@ -44,16 +44,36 @@ public class PlayerAgent extends Agent {
 		}
 
 		public void action() {
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
-			ACLMessage message = agent.receive(mt);
-			if (message != null)
-			{
-				String content = msg.getContent();
-	      		ACLMessage reply = msg.createReply();
+			ACLMessage message = agent.receive();
 
+			// If the recieved message is a request
+			if (message.getPerformative() == ACLMessage.REQUEST) {
+				if (message != null) {
+					String content = msg.getContent(); //Not sure if it is usefull for now.
+
+
+					// Construction of the reply
+	
+					ACLMessage reply = msg.createReply();
+					reply.setPerformative(ACLMessage.INFORM);
+	
+					reply.setContent("rock"); //Placeholder for now, only playing rock
+	
+				} else {
+					block();
+				}
+			} else if (message.getPerformative() == ACLMessage.INFORM) {
+				// If the recieved message is an inform, PLACEHOLDER FOR NOW
+				if (message != null) {
+					String content = msg.getContent();
+					//opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1);
+				} else {
+					block();
+				}
 			} else {
 				block();
 			}
+			
 		}
 	}
 }
