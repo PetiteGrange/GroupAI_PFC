@@ -28,7 +28,38 @@ public class MenuAgent extends Agent {
 
 	public void playRound() {
 		System.out.println("==== Now Starting a Round ====");
+
+		// TODO UPDATE THE LIST OF KNOWN PLAYERS
 	}
 
 }
+
+	private class NormalBehaviour extends Behaviour {
+		private boolean finished = false;
+
+		//MOST OF THE CODE IS PLACEHOLDER
+		// ADDING A SYSTEM OF STEPS SEEMS A GOOD IDEA
+
+		public void action() {
+			// Receive messages
+			ACLMessage msg = myAgent.receive();
+			if (msg != null) {
+				// Process the message
+				String content = msg.getContent();
+				if (content.equals("rock") || content.equals("paper") || content.equals("scissors")) {
+					// Process the message
+					System.out.println("Received: " + content);
+				}
+			}
+			else {
+				block();
+			}
+		}
+
+		public boolean done() {
+			return finished;
+		}
+	}
+
+
 
