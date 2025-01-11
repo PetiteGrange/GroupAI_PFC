@@ -34,30 +34,32 @@ public class MenuAgent extends Agent {
 
 }
 
-	private class NormalBehaviour extends Behaviour {
-		private boolean finished = false;
+	private class ControllerBehaviour extends Behaviour {
+		int step = 0;
 
-		//MOST OF THE CODE IS PLACEHOLDER
-		// ADDING A SYSTEM OF STEPS SEEMS A GOOD IDEA
 
 		public void action() {
-			// Receive messages
-			ACLMessage msg = myAgent.receive();
-			if (msg != null) {
-				// Process the message
-				String content = msg.getContent();
-				if (content.equals("rock") || content.equals("paper") || content.equals("scissors")) {
-					// Process the message
-					System.out.println("Received: " + content);
-				}
-			}
-			else {
-				block();
+			switch (step) {
+				case 0: // Cette partie consiste à envoyer un message à l'agent joueur pour lui demander de jouer
+					
+					break;
+
+				case 1: // Cette partie consiste à recevoir le message de l'agent joueur
+					
+					break;
+
+				case 2: // Cette partie consiste à déterminer le gagnant
+					
+					break;
+			
+				default: // PLACEHOLDER
+					break;
 			}
 		}
 
-		public boolean done() {
-			return finished;
+		
+		public boolean done() { // PLACEHOLDER to finish the behaviour
+			return false;
 		}
 	}
 
