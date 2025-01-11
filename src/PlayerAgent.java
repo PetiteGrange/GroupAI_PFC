@@ -38,8 +38,22 @@ public class PlayerAgent extends Agent {
 	}
 
 	private class GameBehaviour extends CyclicBehaviour {
+		MyAgent myAgent;
+		public MyCyclicBehaviour(MyAgent myAgent) {
+			this.myAgent = myAgent;
+		}
+
 		public void action() {
-			// Receive message, play round, and send response
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
+			ACLMessage message = agent.receive(mt);
+			if (message != null)
+			{
+				String content = msg.getContent();
+	      		ACLMessage reply = msg.createReply();
+
+			} else {
+				block();
+			}
 		}
 	}
 }
