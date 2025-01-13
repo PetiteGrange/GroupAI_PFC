@@ -74,6 +74,10 @@ public class PlayerAgent extends Agent {
 					myAgent.send(reply);
 					System.out.println(getAID().getLocalName() + ": has sent what he played. He played: " + move);
 
+
+
+
+					// TODO Handle the result of the game
 				} else if (message.getPerformative() == ACLMessage.INFORM) {
 					// If the received message is an inform, PLACEHOLDER FOR NOW
 					String content = message.getContent();

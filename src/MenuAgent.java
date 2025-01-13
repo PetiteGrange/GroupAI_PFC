@@ -51,9 +51,10 @@ public class MenuAgent extends Agent {
 				continue;
 			}
 			playerAgents = new AID[2]; //Limit the number of players to 2
+			// NOTE: If there is more than 2 players, he will always pick the 2 players the most recently loaded
 			for (int i = 0; i < 2; ++i) {
 				playerAgents[i] = result[i].getName();
-				System.out.println("Found player " + i + ": " + playerAgents[i].getLocalName());
+				System.out.println("Found player " + (i+1) + ": " + playerAgents[i].getLocalName());
 			}
 			return true;
 		} catch (FIPAException | InterruptedException e) {
@@ -177,6 +178,8 @@ public class MenuAgent extends Agent {
 
 		public boolean done() { // PLACEHOLDER to finish the behaviour
 			//process terminates here if the game is canceled or if the game is finished
+
+			//TODO Add the possibility to finish the game if there's a problem
 			return step == 4;
 		}
 	}
