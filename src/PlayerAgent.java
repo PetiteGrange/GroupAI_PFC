@@ -59,8 +59,8 @@ public class PlayerAgent extends Agent {
 	private class GameBehaviour extends CyclicBehaviour {
 
 		public void action() {
-			ACLMessage message = myAgent.receive();
-
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+			ACLMessage message = myAgent.receive(mt);
 			if (message != null) {
 				// If the received message is a request
 				if (message.getPerformative() == ACLMessage.CFP) {
