@@ -71,10 +71,13 @@ public class MenuAgent extends Agent {
 						cfp.addReceiver(playerAgent);
 					}
 					cfp.setConversationId("RPS-game");
+					cfp.setReplyWith("cfp" + System.currentTimeMillis());
 					myAgent.send(cfp);
-
-					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("RPS-game"),
-							MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+					mt = MessageTemplate.and(
+							MessageTemplate.MatchConversationId("RPS-game"),
+							MessageTemplate.MatchInReplyTo(cfp.getReplyWith())
+					);
+//					mt = MessageTemplate.MatchConversationId("RPS-game");
 					System.out.println("CFP sent to all found players :" + playerAgents.length);
 					step = 1;
 					break;

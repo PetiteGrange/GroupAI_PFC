@@ -72,7 +72,7 @@ public class PlayerAgent extends Agent {
 					reply.setPerformative(ACLMessage.PROPOSE);
 					reply.setContent("rock"); // Placeholder for now, only playing rock
 					reply.setConversationId(message.getConversationId());
-					reply.setReplyWith(message.getReplyWith());
+					reply.setInReplyTo(message.getReplyWith());
 					myAgent.send(reply);
 
 					System.out.println(getAID().getLocalName() + ": has sent what he played.");
