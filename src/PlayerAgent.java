@@ -69,7 +69,10 @@ public class PlayerAgent extends Agent {
 					// Construction of the reply
 					ACLMessage reply = message.createReply();
 					reply.setPerformative(ACLMessage.PROPOSE);
-					reply.setContent("rock"); // Placeholder for now, only playing rock
+					// Calculating player action
+					String move = calculatePlayerAction();
+					//Preparing the reply
+					reply.setContent(move);
 					reply.setConversationId(message.getConversationId());
 					reply.setInReplyTo(message.getReplyWith());
 					myAgent.send(reply);
@@ -97,6 +100,20 @@ public class PlayerAgent extends Agent {
 			} else {
 				block();
 			}
+		}
+
+		public String calculatePlayerAction() {
+			double random = Math.random();
+			double cumulativeProbability = 0.0;
+
+			for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
+				cumulativeProbability += entry.getValue();
+				if (random < cumulativeProbability) {
+					return entry.getKey();
+				}
+			}
+			// Fallback (shouldn't happen if probabilities sum to 1)
+			throw new IllegalStateException("Probabilities do not sum to 1!");
 		}
 	}
 }
