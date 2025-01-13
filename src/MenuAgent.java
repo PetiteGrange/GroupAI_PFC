@@ -30,8 +30,27 @@ public class MenuAgent extends Agent {
 
 	public void playRound() {
 		System.out.println("==== Now Starting a Round ====");
+		System.out.println(getAID().getLocalName() + ": Looking for players");
 
-		// TODO UPDATE THE LIST OF KNOWN PLAYERS
+		DFAgentDescription template = new DFAgentDescription();
+		ServiceDescription sd = new ServiceDescription();
+		sd.setType("player"); // TODO Add in the player agent the type
+		template.addServices(sd);
+
+		// Try to search for players using the template
+		try {
+			DFAgentDescription[] result = DFService.search(this, template);
+			System.out.printl(getAID().getLocalName() + ": Found the following player agents:");
+			playerAgents = new AID[2]; //Limit the number of players to 2
+			for (int i = 0; i < result.length; ++i) {
+				playerAgents[i] = result[i].getName();
+				System.out.println("Found player " + i + ": " + playerAgents[i].getLocalName());
+			}
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+
+		myAgent.addBehaviour(new ControllerBehaviour());
 	}
 
 	private class ControllerBehaviour extends Behaviour {
