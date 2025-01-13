@@ -20,9 +20,21 @@ public class PlayerAgent extends Agent {
 		double paper = Math.random() * (1 - rock);
 		double scissors = 1 - rock - paper;
 		probabilities = new double[]{rock, paper, scissors};
+
+		// Define the memory of the player agent
 		opponentChoices = new HashMap<>();
+
+		// Define the player agent in the DF and define the service
+		DFAgentDescription dfd = new DFAgentDescription();
+    	dfd.setName(getAID());
+    	ServiceDescription sd = new ServiceDescription();
+    	sd.setType("player");
+    	sd.setName("JADE-rock-paper-scissors");
+
+		// Register the GUI
 		myGui = new PlayerAgentGui(this);
 		myGui.display();
+
 		addBehaviour(new GameBehaviour());
 	}
 
