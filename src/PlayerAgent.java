@@ -7,6 +7,7 @@ import jade.domain.*;
 import jade.domain.FIPAAgentManagement.*;
 import javax.swing.*;
 import java.util.Map;
+import java.util.Set;
 import java.util.HashMap;
 
 public class PlayerAgent extends Agent {
@@ -54,50 +55,42 @@ public class PlayerAgent extends Agent {
 		public void action() {
 			ACLMessage message = myAgent.receive();
 
-			// If the recieved message is a request
-			if (message.getPerformative() == ACLMessage.CFP) {
-				if (message != null) {
-					String content = message.getContent(); //Not sure if it is usefull for now.
-
+			if (message != null) {
+				// If the received message is a request
+				if (message.getPerformative() == ACLMessage.CFP) {
+					String content = message.getContent(); // Not sure if it is useful for now.
 
 					// Construction of the reply
-	
 					ACLMessage reply = message.createReply();
-					reply.setPerformative(ACLMessage.INFORM);
-	
-					reply.setContent("rock"); //Placeholder for now, only playing rock
-	
-				} else {
-					block();
-				}
-			} else if (message.getPerformative() == ACLMessage.INFORM) {
-				// If the recieved message is an inform, PLACEHOLDER FOR NOW
-				if (message != null) {
+					reply.setPerformative(ACLMessage.PROPOSE);
+					reply.setContent("rock"); // Placeholder for now, only playing rock
+					reply.setConversationId(message.getConversationId());
+					reply.setReplyWith(message.getReplyWith());
+					myAgent.send(reply);
+
+					System.out.println(getAID().getLocalName() + ": has sent what he played.");
+
+				} else if (message.getPerformative() == ACLMessage.INFORM) {
+					// If the received message is an inform, PLACEHOLDER FOR NOW
 					String content = message.getContent();
-					//opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1);
-				} else {
-					block();
-				}
-			} else if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-				// If the recieved message is an inform, PLACEHOLDER FOR NOW
-				if (message != null) {
+					System.out.println(getAID().getLocalName() + ": INFORM is not handled yet.");
+
+				} else if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+					// If the received message is an accept proposal, it means the player won
 					String content = message.getContent();
-					//opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1);
-				} else {
-					block();
-				}
-			} else if (message.getPerformative() == ACLMessage.REFUSE) {
-				// If the recieved message is an inform, PLACEHOLDER FOR NOW
-				if (message != null) {
+					System.out.println(getAID().getLocalName() + ": ACCEPT_PROPOSAL is not handled yet.");
+
+				} else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
+					// If the received message is a reject proposal, it means the player lost
 					String content = message.getContent();
-					//opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1);
+					System.out.println(getAID().getLocalName() + ": REJECT_PROPOSAL is not handled yet.");
+
 				} else {
 					block();
 				}
 			} else {
 				block();
 			}
-			
 		}
 	}
 }
