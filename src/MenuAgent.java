@@ -102,7 +102,7 @@ public class MenuAgent extends Agent {
 							}
 						}
 					} else {
-						block();
+						block(10000); //Adapt condition aka wait time
 					}
 					break;
 
