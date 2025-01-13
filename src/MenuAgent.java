@@ -43,13 +43,20 @@ public class MenuAgent extends Agent {
 		try {
 			DFAgentDescription[] result = DFService.search(this, template);
 			System.out.println(getAID().getLocalName() + ": Found the following player agents:");
+			if (result.length < 2) {
+				System.out.println("Not enough players found. The game requires 2 players.");
+				playerAgents = null;
+				return false;
+			}
 			playerAgents = new AID[2]; //Limit the number of players to 2
-			for (int i = 0; i < result.length; ++i) {
+			for (int i = 0; i < 2; ++i) {
 				playerAgents[i] = result[i].getName();
 				System.out.println("Found player " + i + ": " + playerAgents[i].getLocalName());
 			}
 		} catch (FIPAException fe) {
 			fe.printStackTrace();
+			playerAgents = null;
+			return false;
 		}
 		if (playerAgents.length == 2) {
 			return true;
@@ -76,7 +83,7 @@ public class MenuAgent extends Agent {
 	}
 
 	private class ControllerBehaviour extends Behaviour {
-		private String[] playerActions = new String[2]; // actions for {player1, player2}
+		private Map<String, String> playerActions = new HashMap<>();
 		private int step = 0;
 		private int repliesCnt = 0;
 		private MessageTemplate mt;
@@ -106,48 +113,48 @@ public class MenuAgent extends Agent {
 
 				case 1: //Step 1: Receive and Wait for the players' actions
 					ACLMessage reply = myAgent.receive(mt);
-					long end = System.currentTimeMillis();
-					if (end - start >= 10000) { //Adapt condition aka wait time
-						System.out.println("Time has expired for step 1. The game is canceled due to lack of response from a player");
-						step = 3;
-						break;
-					}
 					if (reply != null) {
 						if (reply.getPerformative() == ACLMessage.PROPOSE) {
-							if (reply.getContent() != null && repliesCnt < playerActions.length) {
-								playerActions[repliesCnt] = reply.getContent();
+							if (reply.getContent() != null && repliesCnt < playerAgents.length) {
+								playerActions.put(reply.getSender().getLocalName(), reply.getContent());
 								repliesCnt++;
 							}
-							if (repliesCnt == playerActions.length) {
+							if (repliesCnt == playerAgents.length) {
 								System.out.println("Received all proposals");
 								step = 2;
 							}
 						}
 					} else {
-						block(10000); //Adapt condition aka wait time
+						long end = System.currentTimeMillis();
+						if (end - start >= 10000) {
+							System.out.println("Time has expired. The game is canceled due to lack of response from a player");
+							step = 3;
+						} else {
+							block(1000); // Wait for 1 second before checking again
+						}
 					}
 					break;
 
 				case 2: // Step 2: Determine the winner thanks to the players' actions
 					//Checking the players' submitted actions
-					if (playerActions[0] == null || playerActions[1] == null) {
+					if (playerActions.get(playerAgents[0].getLocalName()) == null || playerActions.get(playerAgents[1].getLocalName()) == null) {
 						System.out.println("One of the players did not respond properly. The game is canceled.");
 						step = 3;
 						break;
 					}
 					for (int i = 0; i < 2; i++){
-						if ( !playerActions[i].equals("rock") && !playerActions[i].equals("paper") && !playerActions[i].equals("scissors")) {
+						if ( !playerActions.get(playerAgents[i].getLocalName()).equals("rock") && !playerActions.get(playerAgents[i].getLocalName()).equals("paper") && !playerActions.get(playerAgents[i].getLocalName()).equals("scissors")) {
 							System.out.println("Player" + i + " did not respond properly. The game is canceled.");
-							step = 3; //TODO Find another way to finish the game
+							step = 3; //TODO Find another way to finish the game, perhaps send a message to the player who hasn't responded properly
 							break;
 						}
 					}
-					if (playerActions[0].equals(playerActions[1])) {
-						System.out.println("It's a tie! Both players played " + playerActions[0]);
+					if (playerActions.get(playerAgents[0].getLocalName()).equals(playerActions.get(playerAgents[1].getLocalName()))) {
+						System.out.println("It's a tie! Both players played " + playerActions.get(playerAgents[0].getLocalName()));
 						score.put("ties", score.get("ties") + 1);
-					} else if (playerActions[0].equals("rock") && playerActions[1].equals("scissors") ||
-							playerActions[0].equals("paper") && playerActions[1].equals("rock") ||
-							playerActions[0].equals("scissors") && playerActions[1].equals("paper")) {
+					} else if (playerActions.get(playerAgents[0].getLocalName()).equals("rock") && playerActions.get(playerAgents[1].getLocalName()).equals("scissors") ||
+							playerActions.get(playerAgents[0].getLocalName()).equals("paper") && playerActions.get(playerAgents[1].getLocalName()).equals("rock") ||
+							playerActions.get(playerAgents[0].getLocalName()).equals("scissors") && playerActions.get(playerAgents[1].getLocalName()).equals("paper")) {
 						System.out.println(playerAgents[0].getLocalName() + " wins!");
 						score.put(playerAgents[0].getLocalName(), score.get(playerAgents[0].getLocalName()) + 1);
 					} else {
