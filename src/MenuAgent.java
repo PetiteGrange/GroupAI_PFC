@@ -92,10 +92,12 @@ public class MenuAgent extends Agent {
 					}
 					if (reply != null) {
 						if (reply.getPerformative() == ACLMessage.PROPOSE) {
-							playerActions[repliesCnt] = reply.getContent();
-							repliesCnt++;
-							if (repliesCnt == 1) {
-								//all proposals have been received
+							if (reply.getContent() != null && repliesCnt < playerActions.length) {
+								playerActions[repliesCnt] = reply.getContent();
+								repliesCnt++;
+							}
+							if (repliesCnt == playerActions.length) {
+								System.out.println("Received all proposals");
 								step = 2;
 							}
 						}
@@ -106,6 +108,11 @@ public class MenuAgent extends Agent {
 
 				case 2: // Step 2: Determine the winner thanks to the players' actions
 					//Checking the players' submitted actions
+					if (playerActions[0] == null || playerActions[1] == null) {
+						System.out.println("One of the players did not respond properly. The game is canceled.");
+						step = 3;
+						break;
+					}
 					for (int i = 0; i < 2; i++){
 						if ( !playerActions[i].equals("rock") && !playerActions[i].equals("paper") && !playerActions[i].equals("scissors")) {
 							System.out.println("Player" + i + " did not respond properly. The game is canceled.");
