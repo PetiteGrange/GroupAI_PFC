@@ -45,7 +45,7 @@ public class PlayerAgent extends Agent {
 		addBehaviour(new GameBehaviour());
 	}
 
-	public double[] getProbabilities() {
+	public Map<String, Double> getProbabilities() {
 		return probabilities;
 	}
 
