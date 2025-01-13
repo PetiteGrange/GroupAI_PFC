@@ -27,7 +27,7 @@ public class MenuAgent extends Agent {
 			myGui.display();
 		} else {
 			System.out.println("Players are not set, unable to start the game");
-			takeDown();
+			doDelete();
 		}
 	}
 
@@ -38,34 +38,35 @@ public class MenuAgent extends Agent {
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType("player");
 		template.addServices(sd);
+		int retries = 5; // Retry 5 times
 
-		// Try to search for players using the template
-		try {
+		for (int attempt = 0; attempt < retries; attempt++) {
+		System.out.println("Attempt " + attempt);
+			try {
 			DFAgentDescription[] result = DFService.search(this, template);
-			System.out.println(getAID().getLocalName() + ": Found the following player agents:");
+			System.out.println(getAID().getLocalName() + ": Found the following player agents:" + result.length);
 			if (result.length < 2) {
 				System.out.println("Not enough players found. The game requires 2 players.");
-				playerAgents = null;
-				return false;
+				Thread.sleep(1000); // Wait 1 second before retrying
+				continue;
 			}
 			playerAgents = new AID[2]; //Limit the number of players to 2
 			for (int i = 0; i < 2; ++i) {
 				playerAgents[i] = result[i].getName();
 				System.out.println("Found player " + i + ": " + playerAgents[i].getLocalName());
 			}
-		} catch (FIPAException fe) {
-			fe.printStackTrace();
-			playerAgents = null;
-			return false;
-		}
-		if (playerAgents.length == 2) {
 			return true;
-		} else {
-			return false;
+		} catch (FIPAException | InterruptedException e) {
+			e.printStackTrace();
 		}
+		}
+		System.out.println("Failed to find enough players after retries.");
+		return false;
 	}
 	protected void takeDown() {
-		myGui.dispose();
+		if (myGui != null){
+			myGui.dispose();
+		}
 		System.out.println("Menu agent " + getAID().getLocalName() + " terminated.");
 	}
 
