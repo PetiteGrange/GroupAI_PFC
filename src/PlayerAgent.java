@@ -37,11 +37,9 @@ public class PlayerAgent extends Agent {
 		catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
-
 		// Register the GUI
 		myGui = new PlayerAgentGui(this);
 		myGui.display();
-
 		addBehaviour(new GameBehaviour());
 	}
 
@@ -57,7 +55,6 @@ public class PlayerAgent extends Agent {
 	}
 
 	private class GameBehaviour extends CyclicBehaviour {
-
 		public void action() {
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
 			ACLMessage message = myAgent.receive(mt);
@@ -65,7 +62,6 @@ public class PlayerAgent extends Agent {
 				// If the received message is a request
 				if (message.getPerformative() == ACLMessage.CFP) {
 					String content = message.getContent(); // Not sure if it is useful for now.
-
 					// Construction of the reply
 					ACLMessage reply = message.createReply();
 					reply.setPerformative(ACLMessage.PROPOSE);
@@ -76,8 +72,7 @@ public class PlayerAgent extends Agent {
 					reply.setConversationId(message.getConversationId());
 					reply.setInReplyTo(message.getReplyWith());
 					myAgent.send(reply);
-
-					System.out.println(getAID().getLocalName() + ": has sent what he played.");
+					System.out.println(getAID().getLocalName() + ": has sent what he played. He played: " + move);
 
 				} else if (message.getPerformative() == ACLMessage.INFORM) {
 					// If the received message is an inform, PLACEHOLDER FOR NOW
