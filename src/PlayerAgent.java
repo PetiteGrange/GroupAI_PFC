@@ -12,18 +12,17 @@ import java.util.HashMap;
 
 public class PlayerAgent extends Agent {
 	private PlayerAgentGui myGui;
-	private double[] probabilities; // probabilities for {rock, paper, scissors}
-	private Map<String, Integer> opponentChoices; // used to track opponent's choices
+	private Map<String, Double> probabilities = new HashMap<>(); // probabilities of playing rock, paper, scissors
+	private Map<String, Integer> opponentChoices = new HashMap<>(); // used to track opponent's choices
 
 	protected void setup () {
 		// Initialize probabilities and opponent tracking
 		double rock = Math.random();
 		double paper = Math.random() * (1 - rock);
 		double scissors = 1 - rock - paper;
-		probabilities = new double[]{rock, paper, scissors};
-
-		// Define the memory of the player agent
-		opponentChoices = new HashMap<>();
+		probabilities.put("rock", rock);
+		probabilities.put("paper", paper);
+		probabilities.put("scissors", scissors);
 
 		// Define the player agent in the DF and define the service
 		DFAgentDescription dfd = new DFAgentDescription();
