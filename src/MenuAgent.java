@@ -17,25 +17,21 @@ public class MenuAgent extends Agent {
 	private AID[] playerAgents; // list of known player agents
 
 	protected void setup () {
-		score = new int[]{0, 0, 0};
-		myGui = new MenuAgentGui(this);
-		myGui.display();
-	}
-	protected void takeDown() {
-		myGui.dispose();
-		System.out.println("Menu agent " + getAID().getLocalName() + " terminated.");
-	}
-
-	public Map<String, Integer> getScore() {
-		return score;
-	}
-
-	public String getPlayerAgentName(int index) {
-		return playerAgents[index].getLocalName();
+		// Before starting the game, we need to identify our players
+		if (findPlayers()) {
+			System.out.println("Players are set the Game can start");
+			score.put(playerAgents[0].getLocalName(), 0);
+			score.put(playerAgents[1].getLocalName(), 0);
+			score.put("ties", 0);
+			myGui = new MenuAgentGui(this);
+			myGui.display();
+		} else {
+			System.out.println("Players are not set, unable to start the game");
+			takeDown();
+		}
 	}
 
-	public void playRound() {
-		System.out.println("==== Now Starting a Round ====");
+	private boolean findPlayers() {
 		System.out.println(getAID().getLocalName() + ": Looking for players");
 
 		DFAgentDescription template = new DFAgentDescription();
@@ -55,7 +51,27 @@ public class MenuAgent extends Agent {
 		} catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
+		if (playerAgents.length == 2) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	protected void takeDown() {
+		myGui.dispose();
+		System.out.println("Menu agent " + getAID().getLocalName() + " terminated.");
+	}
 
+	public Map<String, Integer> getScore() {
+		return score;
+	}
+
+	public String getPlayerAgentName(int index) {
+		return playerAgents[index].getLocalName();
+	}
+
+	public void playRound() {
+		System.out.println("==== Now Starting a Round ====");
 		addBehaviour(new ControllerBehaviour());
 	}
 
@@ -128,15 +144,15 @@ public class MenuAgent extends Agent {
 					}
 					if (playerActions[0].equals(playerActions[1])) {
 						System.out.println("It's a tie! Both players played " + playerActions[0]);
-						score[1]++;
+						score.put("ties", score.get("ties") + 1);
 					} else if (playerActions[0].equals("rock") && playerActions[1].equals("scissors") ||
 							playerActions[0].equals("paper") && playerActions[1].equals("rock") ||
 							playerActions[0].equals("scissors") && playerActions[1].equals("paper")) {
-						System.out.println("Player 1 wins!");
-						score[0]++;
+						System.out.println(playerAgents[0].getLocalName() + " wins!");
+						score.put(playerAgents[0].getLocalName(), score.get(playerAgents[0].getLocalName()) + 1);
 					} else {
-						System.out.println("Player 2 wins!");
-						score[2]++;
+						System.out.println(playerAgents[1].getLocalName() + " wins!");
+						score.put(playerAgents[1].getLocalName(), score.get(playerAgents[1].getLocalName()) + 1);
 					}
 					step = 3; //TODO Define a score limit to the game
 					break;

@@ -70,10 +70,7 @@ public class MenuAgentGui extends JFrame {
         pack(); // Adjust the window size to fit components
     }
 
-    public void updateProbabilities() {
-        player1Label.setText(String.valueOf(myAgent.getScore()[0]));
-        tielabel.setText(String.valueOf(myAgent.getScore()[1]));
-        player2label.setText(String.valueOf(myAgent.getScore()[2]));
+    public void updateScore() {
         player1Label.setText(String.valueOf(myAgent.getScore().get(myAgent.getPlayerAgentName(0))));
         tielabel.setText(String.valueOf(myAgent.getScore().get("ties")));
         player2label.setText(String.valueOf(myAgent.getScore().get(myAgent.getPlayerAgentName(1))));
