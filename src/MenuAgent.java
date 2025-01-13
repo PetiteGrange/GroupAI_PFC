@@ -154,6 +154,7 @@ public class MenuAgent extends Agent {
 						System.out.println(playerAgents[1].getLocalName() + " wins!");
 						score.put(playerAgents[1].getLocalName(), score.get(playerAgents[1].getLocalName()) + 1);
 					}
+					myGui.updateScore();
 					step = 3; //TODO Define a score limit to the game
 					break;
 				case 3: // Step 3: Send the result to players
