@@ -31,6 +31,13 @@ public class PlayerAgent extends Agent {
     	ServiceDescription sd = new ServiceDescription();
     	sd.setType("player");
     	sd.setName("JADE-rock-paper-scissors");
+		dfd.addServices(sd);
+		try {
+			DFService.register(this, dfd);
+		}
+		catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
 
 		// Register the GUI
 		myGui = new PlayerAgentGui(this);
