@@ -6,7 +6,6 @@ import java.awt.*;
 public class MenuAgentGui extends JFrame {
     private MenuAgent myAgent;
 
-
     private JLabel player1Label;
     private JLabel tielabel;
     private JLabel player2label;
@@ -41,7 +40,7 @@ public class MenuAgentGui extends JFrame {
         gbc.gridwidth = 1; // Reset grid width
         gbc.gridx = 0;
         gbc.gridy = 2;
-        p.add(new JLabel("Player 1 Victories:"), gbc);
+        p.add(new JLabel(myAgent.getPlayerAgentName(0) + " Victories:"), gbc);
         gbc.gridx = 1;
         player1Label = new JLabel(String.valueOf(a.getScore().get(myAgent.getPlayerAgentName(0))));
         player1Label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -59,7 +58,7 @@ public class MenuAgentGui extends JFrame {
         // Label for scissors
         gbc.gridx = 0;
         gbc.gridy = 4;
-        p.add(new JLabel("Player 2 Victories:"), gbc);
+        p.add(new JLabel(myAgent.getPlayerAgentName(1)+ " Victories:"), gbc);
         gbc.gridx = 1;
         player2label = new JLabel(String.valueOf(a.getScore().get(myAgent.getPlayerAgentName(1))));
         player2label.setHorizontalAlignment(SwingConstants.CENTER);
