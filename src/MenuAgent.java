@@ -8,10 +8,12 @@ import jade.domain.FIPAAgentManagement.*;
 import java.net.*;
 import java.nio.file.attribute.AclEntryPermission;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MenuAgent extends Agent {
 	private MenuAgentGui myGui;
-	private int[] score; // scores for {player1, tie, player2}
+	private Map<String, Integer> score = new HashMap<>();
 	private AID[] playerAgents; // list of known player agents
 
 	protected void setup () {
@@ -24,8 +26,12 @@ public class MenuAgent extends Agent {
 		System.out.println("Menu agent " + getAID().getLocalName() + " terminated.");
 	}
 
-	public int[] getScore() {
+	public Map<String, Integer> getScore() {
 		return score;
+	}
+
+	public String getPlayerAgentName(int index) {
+		return playerAgents[index].getLocalName();
 	}
 
 	public void playRound() {

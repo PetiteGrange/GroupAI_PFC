@@ -43,7 +43,7 @@ public class MenuAgentGui extends JFrame {
         gbc.gridy = 2;
         p.add(new JLabel("Player 1 Victories:"), gbc);
         gbc.gridx = 1;
-        player1Label = new JLabel(String.valueOf(a.getScore()[0]));
+        player1Label = new JLabel(String.valueOf(a.getScore().get(myAgent.getPlayerAgentName(0))));
         player1Label.setHorizontalAlignment(SwingConstants.CENTER);
         p.add(player1Label, gbc);
 
@@ -52,7 +52,7 @@ public class MenuAgentGui extends JFrame {
         gbc.gridy = 3;
         p.add(new JLabel("Ties:"), gbc);
         gbc.gridx = 1;
-        tielabel = new JLabel(String.valueOf(a.getScore()[1]));
+        tielabel = new JLabel(String.valueOf(a.getScore().get("ties")));
         tielabel.setHorizontalAlignment(SwingConstants.CENTER);
         p.add(tielabel, gbc);
 
@@ -61,7 +61,7 @@ public class MenuAgentGui extends JFrame {
         gbc.gridy = 4;
         p.add(new JLabel("Player 2 Victories:"), gbc);
         gbc.gridx = 1;
-        player2label = new JLabel(String.valueOf(a.getScore()[2]));
+        player2label = new JLabel(String.valueOf(a.getScore().get(myAgent.getPlayerAgentName(1))));
         player2label.setHorizontalAlignment(SwingConstants.CENTER);
         p.add(player2label, gbc);
 
@@ -74,6 +74,9 @@ public class MenuAgentGui extends JFrame {
         player1Label.setText(String.valueOf(myAgent.getScore()[0]));
         tielabel.setText(String.valueOf(myAgent.getScore()[1]));
         player2label.setText(String.valueOf(myAgent.getScore()[2]));
+        player1Label.setText(String.valueOf(myAgent.getScore().get(myAgent.getPlayerAgentName(0))));
+        tielabel.setText(String.valueOf(myAgent.getScore().get("ties")));
+        player2label.setText(String.valueOf(myAgent.getScore().get(myAgent.getPlayerAgentName(1))));
     }
 
     public void dispose() {
