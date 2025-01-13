@@ -34,13 +34,13 @@ public class MenuAgent extends Agent {
 
 		DFAgentDescription template = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
-		sd.setType("player"); // TODO Add in the player agent the type
+		sd.setType("player");
 		template.addServices(sd);
 
 		// Try to search for players using the template
 		try {
 			DFAgentDescription[] result = DFService.search(this, template);
-			System.out.printl(getAID().getLocalName() + ": Found the following player agents:");
+			System.out.println(getAID().getLocalName() + ": Found the following player agents:");
 			playerAgents = new AID[2]; //Limit the number of players to 2
 			for (int i = 0; i < result.length; ++i) {
 				playerAgents[i] = result[i].getName();
@@ -50,7 +50,7 @@ public class MenuAgent extends Agent {
 			fe.printStackTrace();
 		}
 
-		myAgent.addBehaviour(new ControllerBehaviour());
+		addBehaviour(new ControllerBehaviour());
 	}
 
 	private class ControllerBehaviour extends Behaviour {
@@ -106,7 +106,7 @@ public class MenuAgent extends Agent {
 					for (int i = 0; i < 2; i++){
 						if ( !playerActions[i].equals("rock") && !playerActions[i].equals("paper") && !playerActions[i].equals("scissors")) {
 							System.out.println("Player" + i + " did not respond properly. The game is canceled.");
-							step = 3;
+							step = 3; //TODO Find another way to finish the game
 							break;
 						}
 					}
@@ -122,14 +122,21 @@ public class MenuAgent extends Agent {
 						System.out.println("Player 2 wins!");
 						score[2]++;
 					}
-					step = 3;
+					step = 3; //TODO Define a score limit to the game
 					break;
+				case 3: // Step 3: Send the result to players
+					//TODO send the result to the players
+					
+
+					step = 4;
+					break;
+
 			}
 		}
 
 		public boolean done() { // PLACEHOLDER to finish the behaviour
 			//process terminates here if the game is canceled or if the game is finished
-			return step == 3;
+			return step == 4;
 		}
 	}
 }

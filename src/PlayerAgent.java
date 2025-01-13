@@ -57,23 +57,19 @@ public class PlayerAgent extends Agent {
 	}
 
 	private class GameBehaviour extends CyclicBehaviour {
-		MyAgent myAgent;
-		public MyCyclicBehaviour(MyAgent myAgent) {
-			this.myAgent = myAgent;
-		}
 
 		public void action() {
-			ACLMessage message = agent.receive();
+			ACLMessage message = myAgent.receive();
 
 			// If the recieved message is a request
-			if (message.getPerformative() == ACLMessage.REQUEST) {
+			if (message.getPerformative() == ACLMessage.CFP) {
 				if (message != null) {
-					String content = msg.getContent(); //Not sure if it is usefull for now.
+					String content = message.getContent(); //Not sure if it is usefull for now.
 
 
 					// Construction of the reply
 	
-					ACLMessage reply = msg.createReply();
+					ACLMessage reply = message.createReply();
 					reply.setPerformative(ACLMessage.INFORM);
 	
 					reply.setContent("rock"); //Placeholder for now, only playing rock
@@ -84,7 +80,23 @@ public class PlayerAgent extends Agent {
 			} else if (message.getPerformative() == ACLMessage.INFORM) {
 				// If the recieved message is an inform, PLACEHOLDER FOR NOW
 				if (message != null) {
-					String content = msg.getContent();
+					String content = message.getContent();
+					//opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1);
+				} else {
+					block();
+				}
+			} else if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+				// If the recieved message is an inform, PLACEHOLDER FOR NOW
+				if (message != null) {
+					String content = message.getContent();
+					//opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1);
+				} else {
+					block();
+				}
+			} else if (message.getPerformative() == ACLMessage.REFUSE) {
+				// If the recieved message is an inform, PLACEHOLDER FOR NOW
+				if (message != null) {
+					String content = message.getContent();
 					//opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1);
 				} else {
 					block();
