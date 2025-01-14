@@ -89,7 +89,6 @@ public class MenuAgent extends Agent {
 		private int step = 0;
 		private int repliesCnt = 0;
 		private MessageTemplate mt;
-		private String winner;
 		private long start = System.currentTimeMillis(); //Used to track time, check if player is taking too long
 
 		enum Results {
@@ -98,7 +97,7 @@ public class MenuAgent extends Agent {
 			P2_WINS,
 			DRAW
 		}
-		Results result;
+		private Results result;
 
 		public void action() {
 			switch (step) {
@@ -167,18 +166,24 @@ public class MenuAgent extends Agent {
 						}
 						if (playerActions.get(playerAgents[0].getLocalName()).equals(playerActions.get(playerAgents[1].getLocalName()))) {
 							System.out.println("It's a tie! Both players played " + playerActions.get(playerAgents[0].getLocalName()));
+
 							score.put("ties", score.get("ties") + 1);
-							winner = "tie";
+							result = Results.DRAW;
+
 						} else if (playerActions.get(playerAgents[0].getLocalName()).equals("rock") && playerActions.get(playerAgents[1].getLocalName()).equals("scissors") ||
 								playerActions.get(playerAgents[0].getLocalName()).equals("paper") && playerActions.get(playerAgents[1].getLocalName()).equals("rock") ||
 								playerActions.get(playerAgents[0].getLocalName()).equals("scissors") && playerActions.get(playerAgents[1].getLocalName()).equals("paper")) {
 							System.out.println(playerAgents[0].getLocalName() + " wins!");
+
 							score.put(playerAgents[0].getLocalName(), score.get(playerAgents[0].getLocalName()) + 1);
-							winner = playerAgents[0].getLocalName();
+							result = Results.P1_WINS;
+
 						} else {
 							System.out.println(playerAgents[1].getLocalName() + " wins!");
+
 							score.put(playerAgents[1].getLocalName(), score.get(playerAgents[1].getLocalName()) + 1);
-							winner = playerAgents[1].getLocalName();
+							result = Results.P2_WINS;
+
 						}
 						myGui.updateScore();
 						step = 3; //TODO Define a score limit to the game
@@ -187,7 +192,6 @@ public class MenuAgent extends Agent {
 					}
 					
 				case 3: // Step 3: Send the result to players
-					//TODO send the result to the players
 
 					if(result==Results.FAILURE){ 
 						//Send a message to the player who did not respond properly
@@ -202,11 +206,10 @@ public class MenuAgent extends Agent {
 						failure.setContent("A player did not respond properly. The game is canceled.");
 						myAgent.send(failure);
 
-
 					} else {
 						//Send the result to both players
 
-						for (int i =0; i < 2; i++) {
+						for (int i =0; i < 2; i++) { //TODO Revise sending the result to the players
 							int opponent_index;
 							if (i == 0) opponent_index = 1;
 							else opponent_index = 0;
