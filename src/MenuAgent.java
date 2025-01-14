@@ -102,14 +102,15 @@ public class MenuAgent extends Agent {
 		public void action() {
 			switch (step) {
 				case 0: //Step 0: Send a CFP to all players
-					//call for action to found players
 
 					ACLMessage cfp = new ACLMessage(ACLMessage.CFP); // Solicit player for it's action
+
 					//Add players to the list of receivers
 					for (AID playerAgent : playerAgents) {
 						cfp.addReceiver(playerAgent);
 					}
 
+					// Set Message details
 					cfp.setConversationId("RPS-game");
 					cfp.setReplyWith("cfp" + System.currentTimeMillis());
 					myAgent.send(cfp);
@@ -154,6 +155,8 @@ public class MenuAgent extends Agent {
 					//If the players did not respond properly, the game is canceled
 					if (playerActions.get(playerAgents[0].getLocalName()) == null || playerActions.get(playerAgents[1].getLocalName()) == null) {
 						System.out.println("One of the players did not respond. The game is canceled.");
+
+						//Define Result as a failure to start the game
 						result = Results.FAILURE;
 						step = 3;
 						break;
@@ -163,28 +166,34 @@ public class MenuAgent extends Agent {
 						for (int i = 0; i < 2; i++){
 							if ( !playerActions.get(playerAgents[i].getLocalName()).equals("rock") && !playerActions.get(playerAgents[i].getLocalName()).equals("paper") && !playerActions.get(playerAgents[i].getLocalName()).equals("scissors")) {
 								System.out.println("Player" + (i+1) + " did not respond properly. The game is canceled.");
+
+								//Define Result as a failure to start the game
 								result = Results.FAILURE;
-								step = 3; //TODO Find another way to finish the game, perhaps send a message to the player who hasn't responded properly
+								step = 3; 
 								break;
 							}
 						}
 						if (playerActions.get(playerAgents[0].getLocalName()).equals(playerActions.get(playerAgents[1].getLocalName()))) {
 							System.out.println("It's a tie! Both players played " + playerActions.get(playerAgents[0].getLocalName()));
 
+							// Define the result as a draw
 							score.put("ties", score.get("ties") + 1);
 							result = Results.DRAW;
 
 						} else if (playerActions.get(playerAgents[0].getLocalName()).equals("rock") && playerActions.get(playerAgents[1].getLocalName()).equals("scissors") ||
 								playerActions.get(playerAgents[0].getLocalName()).equals("paper") && playerActions.get(playerAgents[1].getLocalName()).equals("rock") ||
 								playerActions.get(playerAgents[0].getLocalName()).equals("scissors") && playerActions.get(playerAgents[1].getLocalName()).equals("paper")) {
+									// TODO Is there a better approach to this?
 							System.out.println(playerAgents[0].getLocalName() + " wins!");
 
+							// Define the result as player 1 wins
 							score.put(playerAgents[0].getLocalName(), score.get(playerAgents[0].getLocalName()) + 1);
 							result = Results.P1_WINS;
 
 						} else {
 							System.out.println(playerAgents[1].getLocalName() + " wins!");
 
+							// Define the result as player 2 wins
 							score.put(playerAgents[1].getLocalName(), score.get(playerAgents[1].getLocalName()) + 1);
 							result = Results.P2_WINS;
 
@@ -198,7 +207,7 @@ public class MenuAgent extends Agent {
 				case 3: // Step 3: Send the result to players
 
 					switch (result) {
-
+						// Failure message
 						case FAILURE:
 							ACLMessage failure = new ACLMessage(ACLMessage.FAILURE);
 							for (int i = 0; i < 2; i++) {
@@ -213,7 +222,7 @@ public class MenuAgent extends Agent {
 							break;
 
 						case DRAW:
-
+							// Draw
 							for (int i = 0; i < 2; i++) {
 								ACLMessage drawMessage = new ACLMessage(ACLMessage.INFORM);
 								drawMessage.addReceiver(playerAgents[i]);
@@ -273,8 +282,6 @@ public class MenuAgent extends Agent {
 
 		public boolean done() { // PLACEHOLDER to finish the behaviour
 			//process terminates here if the game is canceled or if the game is finished
-
-			//TODO Add the possibility to finish the game if there's a problem
 			return step == 4;
 		}
 	}
