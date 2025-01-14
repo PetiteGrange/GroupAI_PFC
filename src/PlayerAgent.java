@@ -14,6 +14,9 @@ public class PlayerAgent extends Agent {
 	private PlayerAgentGui myGui;
 	private Map<String, Double> probabilities = new HashMap<>(); // probabilities of playing rock, paper, scissors
 	private Map<String, Integer> opponentChoices = new HashMap<>(); // used to track opponent's choices
+	private Map<String, Integer> myChoices = new HashMap<>(); //used to track our choices for bluff strategy
+	private int turnCounter = 0; // counts the number of turns played
+    private static final int RANDOM_TURNS = 10; // number of turns to play randomly
 
 	protected void setup () {
 		// Initialize probabilities and opponent tracking
@@ -66,18 +69,25 @@ public class PlayerAgent extends Agent {
 					reply.setPerformative(ACLMessage.PROPOSE);
 					// Calculating player action
 					String move = calculatePlayerAction();
+					
+					myChoices.put(move, myChoices.getOrDefault(move, 0) + 1);
+					
 					//Preparing the reply
 					reply.setContent(move);
 					reply.setConversationId(message.getConversationId());
 					reply.setInReplyTo(message.getReplyWith());
 					myAgent.send(reply);
+
+					turnCounter++;
+					
 					System.out.println(getAID().getLocalName() + ": has sent what he played. He played: " + move);
 				} else if (message.getPerformative() == ACLMessage.INFORM) {
 					//Handling the result of the game
 					String content = message.getContent();
 					System.out.println(myAgent.getLocalName() + " received this message: " + content);
 					//Parse string to get info about opponent action + result
-
+					opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1); //Hashmap needs to have each move possible with the numbers of time they were played
+					
 				} else {
 					block();
 				}
@@ -86,18 +96,48 @@ public class PlayerAgent extends Agent {
 			}
 		}
 
-		public String calculatePlayerAction() {
-			double random = Math.random();
-			double cumulativeProbability = 0.0;
+	    private String findMostFrequentMove(Map<String, Integer> choices) {
+	        String mostFrequentMove = "rock";
+	        int maxCount = 0;
 
-			for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
-				cumulativeProbability += entry.getValue();
-				if (random < cumulativeProbability) {
-					return entry.getKey();
-				}
-			}
-			// Fallback (shouldn't happen if probabilities sum to 1)
-			throw new IllegalStateException("Probabilities do not sum to 1!");
-		}
+	        for (Map.Entry<String, Integer> entry : choices.entrySet()) {
+	            if (entry.getValue() > maxCount) {
+	                maxCount = entry.getValue();
+	                mostFrequentMove = entry.getKey();
+	            }
+	        }
+	        return mostFrequentMove;
+	    }
+
+	    public String calculatePlayerAction() {
+	        if (turnCounter < RANDOM_TURNS) {
+	            double random = Math.random();
+	            double cumulativeProbability = 0.0;
+	            for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
+	                cumulativeProbability += entry.getValue();
+	                if (random < cumulativeProbability) {
+	                    return entry.getKey();
+	                }
+	            }
+	        } else {
+	            double bluffChance = 0.2;
+	            if (Math.random() < bluffChance) {
+	                String mymostFrequentMove = findMostFrequentMove(myChoices);
+	                switch (mymostFrequentMove) {
+                    	case "rock": return "scissors";
+                    	case "paper": return "rock";
+                    	case "scissors": return "paper";
+	                }
+	            } else {
+	                String mostFrequentMove = findMostFrequentMove(opponentChoices);
+	                switch (mostFrequentMove) {
+	                    case "rock": return "paper";
+	                    case "paper": return "scissors";
+	                    case "scissors": return "rock";
+	                }
+	            }
+	        }
+	        return "rock"; // Default fallback
+	    }
 	}
 }
