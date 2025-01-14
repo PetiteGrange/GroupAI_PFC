@@ -33,7 +33,7 @@ class PlayerAgentGui extends JFrame {
         gbc.gridy = 1;
         p.add(new JLabel("Rock:"), gbc);
         gbc.gridx = 1;
-        rockProbLabel = new JLabel(String.format("%.2f", a.getProbabilities()[0]));
+        rockProbLabel = new JLabel(String.format("%.2f", a.getProbabilities().get("rock")));
         rockProbLabel.setHorizontalAlignment(SwingConstants.CENTER);
         p.add(rockProbLabel, gbc);
 
@@ -42,7 +42,7 @@ class PlayerAgentGui extends JFrame {
         gbc.gridy = 2;
         p.add(new JLabel("Paper:"), gbc);
         gbc.gridx = 1;
-        paperProbLabel = new JLabel(String.format("%.2f", a.getProbabilities()[1]));
+        paperProbLabel = new JLabel(String.format("%.2f", a.getProbabilities().get("paper")));
         paperProbLabel.setHorizontalAlignment(SwingConstants.CENTER);
         p.add(paperProbLabel, gbc);
 
@@ -51,7 +51,7 @@ class PlayerAgentGui extends JFrame {
         gbc.gridy = 3;
         p.add(new JLabel("Scissors:"), gbc);
         gbc.gridx = 1;
-        scissorsProbLabel = new JLabel(String.format("%.2f", a.getProbabilities()[2]));
+        scissorsProbLabel = new JLabel(String.format("%.2f", a.getProbabilities().get("scissors")));
         scissorsProbLabel.setHorizontalAlignment(SwingConstants.CENTER);
         p.add(scissorsProbLabel, gbc);
 
@@ -61,9 +61,9 @@ class PlayerAgentGui extends JFrame {
     }
 
     public void updateProbabilities() {
-        rockProbLabel.setText(String.valueOf(myAgent.getProbabilities()[0]));
-        paperProbLabel.setText(String.valueOf(myAgent.getProbabilities()[1]));
-        scissorsProbLabel.setText(String.valueOf(myAgent.getProbabilities()[2]));
+        rockProbLabel.setText(String.valueOf(myAgent.getProbabilities().get("rock")));
+        paperProbLabel.setText(String.valueOf(myAgent.getProbabilities().get("paper")));
+        scissorsProbLabel.setText(String.valueOf(myAgent.getProbabilities().get("scissors")));
     }
 
     public void display() {
