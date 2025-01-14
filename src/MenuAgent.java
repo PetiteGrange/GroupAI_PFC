@@ -195,36 +195,79 @@ public class MenuAgent extends Agent {
 
 					if(result==Results.FAILURE){ 
 						//Send a message to the player who did not respond properly
-						ACLMessage failure = new ACLMessage(ACLMessage.FAILURE);
-						for (int i = 0; i < 2; i++) {
-							if (playerActions.get(playerAgents[i].getLocalName()) == null) {
-								failure.addReceiver(playerAgents[i]);
-							}
-						}
-						failure.setConversationId("RPS-game-aborted");
-						failure.setConversationId("failure"+ System.currentTimeMillis());
-						failure.setContent("A player did not respond properly. The game is canceled.");
-						myAgent.send(failure);
+						
 
 					} else {
 						//Send the result to both players
 
-						for (int i =0; i < 2; i++) { //TODO Revise sending the result to the players
-							int opponent_index;
-							if (i == 0) opponent_index = 1;
-							else opponent_index = 0;
-							ACLMessage inform = new ACLMessage(ACLMessage.INFORM);
-							inform.addReceiver(playerAgents[i]);
-							inform.setConversationId("RPS-game-result");
-							inform.setConversationId("inform"+ System.currentTimeMillis());
-							//Use JSON to send result content (Better structured)
-							// Construct the JSON content
-							String opponentAction = playerActions.get(playerAgents[opponent_index].getLocalName());
-							String winner = "Player 1"; // Replace with the logic to determine the winner
+						switch (result) {
 
-							inform.setContent("Opponent action: " + playerActions.get(playerAgents[opponent_index].getLocalName()) + " | Result: " + winner);
-							myAgent.send(inform);
+							case FAILURE:
+								ACLMessage failure = new ACLMessage(ACLMessage.FAILURE);
+								for (int i = 0; i < 2; i++) {
+									if (playerActions.get(playerAgents[i].getLocalName()) == null) {
+										failure.addReceiver(playerAgents[i]);
+									}
+								}
+								failure.setConversationId("RPS-game-aborted");
+								failure.setConversationId("failure"+ System.currentTimeMillis());
+								myAgent.send(failure);
+
+								break;
+
+							case DRAW:
+
+								for (int i = 0; i < 2; i++) {
+									ACLMessage drawMessage = new ACLMessage(ACLMessage.INFORM);
+									drawMessage.addReceiver(playerAgents[i]);
+									String opponentMove = playerActions.get(playerAgents[1 - i].getLocalName());
+									drawMessage.setContent("Draw. Your opponent played: " + opponentMove);
+									drawMessage.setConversationId("RPS-game-draw");
+									drawMessage.setReplyWith("draw" + System.currentTimeMillis());
+									myAgent.send(drawMessage);
+								}
+
+								break;
+
+							case P1_WINS:
+								// Player 1 wins
+								ACLMessage p1Wins = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+								p1Wins.addReceiver(playerAgents[0]);
+								p1Wins.setContent("You win! Your opponent played: " + playerActions.get(playerAgents[1].getLocalName()));
+								p1Wins.setConversationId("RPS-game-result");
+								p1Wins.setReplyWith("win" + System.currentTimeMillis());
+								myAgent.send(p1Wins);
+							
+								ACLMessage p2Loses = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+								p2Loses.addReceiver(playerAgents[1]);
+								p2Loses.setContent("You lose! Your opponent played: " + playerActions.get(playerAgents[0].getLocalName()));
+								p2Loses.setConversationId("RPS-game-result");
+								p2Loses.setReplyWith("lose" + System.currentTimeMillis());
+								myAgent.send(p2Loses);
+							
+								break;
+							
+							case P2_WINS:
+								// Player 2 wins
+								ACLMessage p2Wins = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+								p2Wins.addReceiver(playerAgents[1]);
+								p2Wins.setContent("You win! Your opponent played: " + playerActions.get(playerAgents[0].getLocalName()));
+								p2Wins.setConversationId("RPS-game-result");
+								p2Wins.setReplyWith("win" + System.currentTimeMillis());
+								myAgent.send(p2Wins);
+							
+								ACLMessage p1Loses = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+								p1Loses.addReceiver(playerAgents[0]);
+								p1Loses.setContent("You lose! Your opponent played: " + playerActions.get(playerAgents[1].getLocalName()));
+								p1Loses.setConversationId("RPS-game-result");
+								p1Loses.setReplyWith("lose" + System.currentTimeMillis());
+								myAgent.send(p1Loses);
+							
+								break;
+
 						}
+
+
 						step = 4;
 						break;
 
