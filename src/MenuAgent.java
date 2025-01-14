@@ -92,6 +92,13 @@ public class MenuAgent extends Agent {
 		private String winner;
 		private long start = System.currentTimeMillis(); //Used to track time, check if player is taking too long
 
+		enum Results {
+			FAILURE,
+			P1_WINS,
+			P2_WINS,
+			DRAW
+		}
+		Results result;
 
 		public void action() {
 			switch (step) {
@@ -140,59 +147,87 @@ public class MenuAgent extends Agent {
 
 				case 2: // Step 2: Determine the winner thanks to the players' actions
 					//Checking the players' submitted actions
+
+					//If the players did not respond properly, the game is canceled
 					if (playerActions.get(playerAgents[0].getLocalName()) == null || playerActions.get(playerAgents[1].getLocalName()) == null) {
-						System.out.println("One of the players did not respond properly. The game is canceled.");
-						step = 4;
+						System.out.println("One of the players did not respond. The game is canceled.");
+						result = Results.FAILURE;
+						step = 3;
 						break;
-					}
-					for (int i = 0; i < 2; i++){
-						if ( !playerActions.get(playerAgents[i].getLocalName()).equals("rock") && !playerActions.get(playerAgents[i].getLocalName()).equals("paper") && !playerActions.get(playerAgents[i].getLocalName()).equals("scissors")) {
-							System.out.println("Player" + i + " did not respond properly. The game is canceled.");
-							step = 4; //TODO Find another way to finish the game, perhaps send a message to the player who hasn't responded properly
-							break;
-						}
-					}
-					if (playerActions.get(playerAgents[0].getLocalName()).equals(playerActions.get(playerAgents[1].getLocalName()))) {
-						System.out.println("It's a tie! Both players played " + playerActions.get(playerAgents[0].getLocalName()));
-						score.put("ties", score.get("ties") + 1);
-						winner = "tie";
-					} else if (playerActions.get(playerAgents[0].getLocalName()).equals("rock") && playerActions.get(playerAgents[1].getLocalName()).equals("scissors") ||
-							playerActions.get(playerAgents[0].getLocalName()).equals("paper") && playerActions.get(playerAgents[1].getLocalName()).equals("rock") ||
-							playerActions.get(playerAgents[0].getLocalName()).equals("scissors") && playerActions.get(playerAgents[1].getLocalName()).equals("paper")) {
-						System.out.println(playerAgents[0].getLocalName() + " wins!");
-						score.put(playerAgents[0].getLocalName(), score.get(playerAgents[0].getLocalName()) + 1);
-						winner = playerAgents[0].getLocalName();
+
 					} else {
-						System.out.println(playerAgents[1].getLocalName() + " wins!");
-						score.put(playerAgents[1].getLocalName(), score.get(playerAgents[1].getLocalName()) + 1);
-						winner = playerAgents[1].getLocalName();
+
+						for (int i = 0; i < 2; i++){
+							if ( !playerActions.get(playerAgents[i].getLocalName()).equals("rock") && !playerActions.get(playerAgents[i].getLocalName()).equals("paper") && !playerActions.get(playerAgents[i].getLocalName()).equals("scissors")) {
+								System.out.println("Player" + (i+1) + " did not respond properly. The game is canceled.");
+								result = Results.FAILURE;
+								step = 3; //TODO Find another way to finish the game, perhaps send a message to the player who hasn't responded properly
+								break;
+							}
+						}
+						if (playerActions.get(playerAgents[0].getLocalName()).equals(playerActions.get(playerAgents[1].getLocalName()))) {
+							System.out.println("It's a tie! Both players played " + playerActions.get(playerAgents[0].getLocalName()));
+							score.put("ties", score.get("ties") + 1);
+							winner = "tie";
+						} else if (playerActions.get(playerAgents[0].getLocalName()).equals("rock") && playerActions.get(playerAgents[1].getLocalName()).equals("scissors") ||
+								playerActions.get(playerAgents[0].getLocalName()).equals("paper") && playerActions.get(playerAgents[1].getLocalName()).equals("rock") ||
+								playerActions.get(playerAgents[0].getLocalName()).equals("scissors") && playerActions.get(playerAgents[1].getLocalName()).equals("paper")) {
+							System.out.println(playerAgents[0].getLocalName() + " wins!");
+							score.put(playerAgents[0].getLocalName(), score.get(playerAgents[0].getLocalName()) + 1);
+							winner = playerAgents[0].getLocalName();
+						} else {
+							System.out.println(playerAgents[1].getLocalName() + " wins!");
+							score.put(playerAgents[1].getLocalName(), score.get(playerAgents[1].getLocalName()) + 1);
+							winner = playerAgents[1].getLocalName();
+						}
+						myGui.updateScore();
+						step = 3; //TODO Define a score limit to the game
+						break;
+
 					}
-					myGui.updateScore();
-					step = 3; //TODO Define a score limit to the game
-					break;
+					
 				case 3: // Step 3: Send the result to players
 					//TODO send the result to the players
-					
 
-					for (int i =0; i < 2; i++) {
-						int opponent_index;
-						if (i == 0) opponent_index = 1;
-						else opponent_index = 0;
-						ACLMessage inform = new ACLMessage(ACLMessage.INFORM);
-						inform.addReceiver(playerAgents[i]);
-						inform.setConversationId("RPS-game-result");
-						inform.setConversationId("inform"+ System.currentTimeMillis());
-						//Use JSON to send result content (Better structured)
-						// Construct the JSON content
-						String opponentAction = playerActions.get(playerAgents[opponent_index].getLocalName());
-						String winner = "Player 1"; // Replace with the logic to determine the winner
+					if(result==Results.FAILURE){ 
+						//Send a message to the player who did not respond properly
+						ACLMessage failure = new ACLMessage(ACLMessage.FAILURE);
+						for (int i = 0; i < 2; i++) {
+							if (playerActions.get(playerAgents[i].getLocalName()) == null) {
+								failure.addReceiver(playerAgents[i]);
+							}
+						}
+						failure.setConversationId("RPS-game-aborted");
+						failure.setConversationId("failure"+ System.currentTimeMillis());
+						failure.setContent("A player did not respond properly. The game is canceled.");
+						myAgent.send(failure);
 
-						inform.setContent("Opponent action: " + playerActions.get(playerAgents[opponent_index].getLocalName()) + " | Result: " + winner);
-						myAgent.send(inform);
-					}
-					step = 4;
-					break;
 
+					} else {
+						//Send the result to both players
+
+						for (int i =0; i < 2; i++) {
+							int opponent_index;
+							if (i == 0) opponent_index = 1;
+							else opponent_index = 0;
+							ACLMessage inform = new ACLMessage(ACLMessage.INFORM);
+							inform.addReceiver(playerAgents[i]);
+							inform.setConversationId("RPS-game-result");
+							inform.setConversationId("inform"+ System.currentTimeMillis());
+							//Use JSON to send result content (Better structured)
+							// Construct the JSON content
+							String opponentAction = playerActions.get(playerAgents[opponent_index].getLocalName());
+							String winner = "Player 1"; // Replace with the logic to determine the winner
+
+							inform.setContent("Opponent action: " + playerActions.get(playerAgents[opponent_index].getLocalName()) + " | Result: " + winner);
+							myAgent.send(inform);
+						}
+						step = 4;
+						break;
+
+				}
+
+				
 			}
 		}
 
