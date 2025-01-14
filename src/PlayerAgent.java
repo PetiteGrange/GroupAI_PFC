@@ -56,12 +56,11 @@ public class PlayerAgent extends Agent {
 
 	private class GameBehaviour extends CyclicBehaviour {
 		public void action() {
-			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
-			ACLMessage message = myAgent.receive(mt);
+			//MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+			ACLMessage message = myAgent.receive();
 			if (message != null) {
 				// If the received message is a request
 				if (message.getPerformative() == ACLMessage.CFP) {
-					String content = message.getContent(); // Not sure if it is useful for now.
 					// Construction of the reply
 					ACLMessage reply = message.createReply();
 					reply.setPerformative(ACLMessage.PROPOSE);
@@ -73,25 +72,11 @@ public class PlayerAgent extends Agent {
 					reply.setInReplyTo(message.getReplyWith());
 					myAgent.send(reply);
 					System.out.println(getAID().getLocalName() + ": has sent what he played. He played: " + move);
-
-
-
-
-					// TODO Handle the result of the game
 				} else if (message.getPerformative() == ACLMessage.INFORM) {
-					// If the received message is an inform, PLACEHOLDER FOR NOW
+					//Handling the result of the game
 					String content = message.getContent();
-					System.out.println(getAID().getLocalName() + ": INFORM is not handled yet.");
-
-				} else if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-					// If the received message is an accept proposal, it means the player won
-					String content = message.getContent();
-					System.out.println(getAID().getLocalName() + ": ACCEPT_PROPOSAL is not handled yet.");
-
-				} else if (message.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-					// If the received message is a reject proposal, it means the player lost
-					String content = message.getContent();
-					System.out.println(getAID().getLocalName() + ": REJECT_PROPOSAL is not handled yet.");
+					System.out.println(myAgent.getLocalName() + " received this message: " + content);
+					//Parse string to get info about opponent action + result
 
 				} else {
 					block();
