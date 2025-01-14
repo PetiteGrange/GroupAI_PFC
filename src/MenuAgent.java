@@ -205,77 +205,46 @@ public class MenuAgent extends Agent {
 					}
 					
 				case 3: // Step 3: Send the result to players
-
-					switch (result) {
-						// Failure message
-						case FAILURE:
-							ACLMessage failure = new ACLMessage(ACLMessage.FAILURE);
-							for (int i = 0; i < 2; i++) {
-								if (playerActions.get(playerAgents[i].getLocalName()) == null) {
-									failure.addReceiver(playerAgents[i]);
-								}
-							}
-							failure.setConversationId("RPS-game-aborted");
-							failure.setConversationId("failure"+ System.currentTimeMillis());
-							myAgent.send(failure);
-
-							break;
-
-						case DRAW:
-							// Draw
-							for (int i = 0; i < 2; i++) {
-								ACLMessage drawMessage = new ACLMessage(ACLMessage.INFORM);
-								drawMessage.addReceiver(playerAgents[i]);
-								String opponentMove = playerActions.get(playerAgents[1 - i].getLocalName());
-								drawMessage.setContent(opponentMove);
-								drawMessage.setConversationId("RPS-game-draw");
-								drawMessage.setReplyWith("draw" + System.currentTimeMillis());
-								myAgent.send(drawMessage);
-							}
-
-							break;
-
-						case P1_WINS:
-							// Player 1 wins
-							ACLMessage p1Wins = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-							p1Wins.addReceiver(playerAgents[0]);
-							p1Wins.setContent(playerActions.get(playerAgents[1].getLocalName()));
-							p1Wins.setConversationId("RPS-game-result");
-							p1Wins.setReplyWith("win" + System.currentTimeMillis());
-							myAgent.send(p1Wins);
-						
-							ACLMessage p2Loses = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-							p2Loses.addReceiver(playerAgents[1]);
-							p2Loses.setContent(playerActions.get(playerAgents[0].getLocalName()));
-							p2Loses.setConversationId("RPS-game-result");
-							p2Loses.setReplyWith("lose" + System.currentTimeMillis());
-							myAgent.send(p2Loses);
-						
-							break;
-						
-						case P2_WINS:
-							// Player 2 wins
-							ACLMessage p2Wins = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-							p2Wins.addReceiver(playerAgents[1]);
-							p2Wins.setContent(playerActions.get(playerAgents[0].getLocalName()));
-							p2Wins.setConversationId("RPS-game-result");
-							p2Wins.setReplyWith("win" + System.currentTimeMillis());
-							myAgent.send(p2Wins);
-						
-							ACLMessage p1Loses = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-							p1Loses.addReceiver(playerAgents[0]);
-							p1Loses.setContent(playerActions.get(playerAgents[1].getLocalName()));
-							p1Loses.setConversationId("RPS-game-result");
-							p1Loses.setReplyWith("lose" + System.currentTimeMillis());
-							myAgent.send(p1Loses);
-						
-							break;
-
+					if (result == null) {
+						System.out.println("Error: Result not defined");
+						step = 4;
+						break;
 					}
-					
+					for (int i = 0; i < 2; i++) {
+						int messageType;
+						String conversationIdPrefix;
+						switch (result){
+							case FAILURE:
+							case DRAW:
+								messageType = ACLMessage.INFORM;
+								conversationIdPrefix = "inform";
+								break;
+							case P1_WINS:
+								messageType = ACLMessage.ACCEPT_PROPOSAL;
+								conversationIdPrefix = "accept";
+								break;
+							case P2_WINS:
+								messageType = ACLMessage.REJECT_PROPOSAL;
+								conversationIdPrefix = "reject";
+								break;
+							default:
+								// In case of failure we send the info to both players
+								// even to the player that did not cause the error
+								// perhaps adapt message content to inform the player of the error
+								// if the error is caused by the player maybe the message can cause the player to reset??
+								messageType = ACLMessage.FAILURE;
+								conversationIdPrefix = "failure";
+								break;
+						}
+						ACLMessage message = new ACLMessage(messageType);
+						message.addReceiver(playerAgents[i]);
+						message.setConversationId(conversationIdPrefix + System.currentTimeMillis());
+						//Here adapt content if error message perhaps
+						message.setContent(playerActions.get(playerAgents[1-i].getLocalName()));
+						myAgent.send(message);
+					}
 					step = 4;
 					break;
-
 				}
 
 		}
