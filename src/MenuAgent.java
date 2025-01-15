@@ -214,18 +214,27 @@ public class MenuAgent extends Agent {
 						int messageType;
 						String conversationIdPrefix;
 						switch (result){
-							case FAILURE:
 							case DRAW:
 								messageType = ACLMessage.INFORM;
 								conversationIdPrefix = "inform";
 								break;
 							case P1_WINS:
-								messageType = ACLMessage.ACCEPT_PROPOSAL;
-								conversationIdPrefix = "accept";
+								if (i == 0) {
+									messageType = ACLMessage.ACCEPT_PROPOSAL;
+									conversationIdPrefix = "accept";
+								} else {
+									messageType = ACLMessage.REJECT_PROPOSAL;
+									conversationIdPrefix = "reject";
+								}
 								break;
 							case P2_WINS:
-								messageType = ACLMessage.REJECT_PROPOSAL;
-								conversationIdPrefix = "reject";
+								if (i == 1) {
+									messageType = ACLMessage.ACCEPT_PROPOSAL;
+									conversationIdPrefix = "accept";
+								} else {
+									messageType = ACLMessage.REJECT_PROPOSAL;
+									conversationIdPrefix = "reject";
+								}
 								break;
 							default:
 								// In case of failure we send the info to both players
