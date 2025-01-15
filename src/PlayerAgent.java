@@ -95,6 +95,18 @@ public class PlayerAgent extends Agent {
 				block();
 			}
 		}
+		
+		private void normalizeProbabilities(Map<String, Double> probabilities) {
+		    double total = probabilities.values().stream().mapToDouble(Double::doubleValue).sum();
+		    if (total > 0) {
+		        probabilities.replaceAll((key, value) -> value / total);
+		    } else {
+		        // Handle case where total is 0 (fallback to equal probabilities)
+		        int size = probabilities.size();
+		        probabilities.replaceAll((key, value) -> 1.0 / size);
+		    }
+		}
+
 
 	    private String findMostFrequentMove(Map<String, Integer> choices) {
 	        String mostFrequentMove = "rock";
@@ -135,6 +147,8 @@ public class PlayerAgent extends Agent {
 	                probabilities.put("paper", Math.max(probabilities.get("paper") - decrease, 0.0));
 	                break;
 	        }
+	        
+	        normalizeProbabilities(probabilities);
 	    }
 
 
