@@ -183,6 +183,5 @@ public class PlayerAgent extends Agent {
 	        return "rock"; // Fallback par défaut
 	    }
 	}
-}
 
 }
