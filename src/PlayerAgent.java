@@ -108,6 +108,35 @@ public class PlayerAgent extends Agent {
 	        }
 	        return mostFrequentMove;
 	    }
+	    
+	    private void updateProbabilities() {
+	    	
+	        String mostFrequentMove = findMostFrequentMove(opponentChoices);
+	        
+	        double increase = 0.1; 
+	        double decrease = 0.05; 
+	        
+	        switch (mostFrequentMove) {
+	            case "rock":
+	                probabilities.put("rock", Math.min(probabilities.get("rock") + increase, 1.0));
+	                probabilities.put("paper", Math.max(probabilities.get("paper") - decrease, 0.0));
+	                probabilities.put("scissors", Math.max(probabilities.get("scissors") - decrease, 0.0));
+	                break;
+
+	            case "paper":
+	                probabilities.put("paper", Math.min(probabilities.get("paper") + increase, 1.0));
+	                probabilities.put("rock", Math.max(probabilities.get("rock") - decrease, 0.0));
+	                probabilities.put("scissors", Math.max(probabilities.get("scissors") - decrease, 0.0));
+	                break;
+
+	            case "scissors":
+	                probabilities.put("scissors", Math.min(probabilities.get("scissors") + increase, 1.0));
+	                probabilities.put("rock", Math.max(probabilities.get("rock") - decrease, 0.0));
+	                probabilities.put("paper", Math.max(probabilities.get("paper") - decrease, 0.0));
+	                break;
+	        }
+	    }
+
 
 	    public String calculatePlayerAction() {
 	        if (turnCounter < RANDOM_TURNS) {
@@ -119,25 +148,37 @@ public class PlayerAgent extends Agent {
 	                    return entry.getKey();
 	                }
 	            }
-	        } else {
-	            double bluffChance = 0.2;
-	            if (Math.random() < bluffChance) {
-	                String mymostFrequentMove = findMostFrequentMove(myChoices);
-	                switch (mymostFrequentMove) {
-                    	case "rock": return "scissors";
-                    	case "paper": return "rock";
-                    	case "scissors": return "paper";
-	                }
-	            } else {
-	                String mostFrequentMove = findMostFrequentMove(opponentChoices);
-	                switch (mostFrequentMove) {
-	                    case "rock": return "paper";
-	                    case "paper": return "scissors";
-	                    case "scissors": return "rock";
+	        }
+
+	        updateProbabilities();
+
+	        double strategySelector = Math.random();
+
+	        if (strategySelector < 0.4) {
+	            double random = Math.random();
+	            double cumulativeProbability = 0.0;
+	            for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
+	                cumulativeProbability += entry.getValue();
+	                if (random < cumulativeProbability) {
+	                    return entry.getKey();
 	                }
 	            }
+	        } else if (strategySelector < 0.7) {
+	            String mostFrequentMove = findMostFrequentMove(opponentChoices);
+	            switch (mostFrequentMove) {
+	                case "rock": return "paper";
+	                case "paper": return "scissors";
+	                case "scissors": return "rock";
+	            }
+	        } else {
+	            String myMostFrequentMove = findMostFrequentMove(myChoices);
+	            switch (myMostFrequentMove) {
+	                case "rock": return "scissors";
+	                case "paper": return "rock";
+	                case "scissors": return "paper";
+	            }
 	        }
-	        return "rock"; // Default fallback
+
+	        return "rock"; // Fallback par défaut
 	    }
-	}
 }
