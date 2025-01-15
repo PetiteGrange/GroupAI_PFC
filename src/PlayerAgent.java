@@ -54,6 +54,13 @@ public class PlayerAgent extends Agent {
 		JOptionPane.showMessageDialog(null,message,"Message",JOptionPane.PLAIN_MESSAGE);
 	}
 
+	public void setStrategy(String strategy) {
+		// Set the probabilities based on the strategy
+			
+			//TODO PLACEHOLDER CODE
+
+	}
+
 	private class GameBehaviour extends CyclicBehaviour {
 		public void action() {
 			//MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);

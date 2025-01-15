@@ -2,6 +2,8 @@ package jadelab1;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 class PlayerAgentGui extends JFrame {
     private PlayerAgent myAgent;
@@ -9,7 +11,11 @@ class PlayerAgentGui extends JFrame {
     private JLabel rockProbLabel;
     private JLabel paperProbLabel;
     private JLabel scissorsProbLabel;
-    PlayerAgentGui(PlayerAgent a) {
+
+    private JComboBox<String> strategyComboBox;
+    private String[] strategies = {"Random", "Rock", "Paper", "Scissors"};
+
+    public PlayerAgentGui(PlayerAgent a) {
         super(a.getLocalName());
         myAgent = a;
 
@@ -54,6 +60,19 @@ class PlayerAgentGui extends JFrame {
         scissorsProbLabel = new JLabel(String.format("%.2f", a.getProbabilities().get("scissors")));
         scissorsProbLabel.setHorizontalAlignment(SwingConstants.CENTER);
         p.add(scissorsProbLabel, gbc);
+
+        // Combobox for strategy
+        strategyComboBox = new JComboBox<>(strategies);
+        strategyComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selectedStrategy = (String) strategyComboBox.getSelectedItem();
+                myAgent.setStrategy(selectedStrategy);
+            }
+        });
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        p.add(strategyComboBox, gbc);
 
         // Add panel to frame
         getContentPane().add(p);
