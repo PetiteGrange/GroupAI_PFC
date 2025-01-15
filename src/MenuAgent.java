@@ -89,27 +89,38 @@ public class MenuAgent extends Agent {
 		private int step = 0;
 		private int repliesCnt = 0;
 		private MessageTemplate mt;
-		private String winner;
 		private long start = System.currentTimeMillis(); //Used to track time, check if player is taking too long
 
+		enum Results {
+			FAILURE,
+			P1_WINS,
+			P2_WINS,
+			DRAW
+		}
+		private Results result;
 
 		public void action() {
 			switch (step) {
 				case 0: //Step 0: Send a CFP to all players
-					//call for action to found players
+
 					ACLMessage cfp = new ACLMessage(ACLMessage.CFP); // Solicit player for it's action
+
 					//Add players to the list of receivers
 					for (AID playerAgent : playerAgents) {
 						cfp.addReceiver(playerAgent);
 					}
+
+					// Set Message details
 					cfp.setConversationId("RPS-game");
 					cfp.setReplyWith("cfp" + System.currentTimeMillis());
 					myAgent.send(cfp);
+
+					//Prepare the template to get proposals
 					mt = MessageTemplate.and(
 							MessageTemplate.MatchConversationId("RPS-game"),
 							MessageTemplate.MatchInReplyTo(cfp.getReplyWith())
 					);
-//					mt = MessageTemplate.MatchConversationId("RPS-game");
+
 					System.out.println("CFP sent to all found players :" + playerAgents.length);
 					step = 1;
 					break;
@@ -131,6 +142,7 @@ public class MenuAgent extends Agent {
 						long end = System.currentTimeMillis();
 						if (end - start >= 10000) {
 							System.out.println("Time has expired. The game is canceled due to lack of response from a player");
+							result = Results.FAILURE;
 							step = 4;
 						} else {
 							block(1000); // Wait for 1 second before checking again
@@ -140,66 +152,111 @@ public class MenuAgent extends Agent {
 
 				case 2: // Step 2: Determine the winner thanks to the players' actions
 					//Checking the players' submitted actions
+
+					//If the players did not respond properly, the game is canceled
 					if (playerActions.get(playerAgents[0].getLocalName()) == null || playerActions.get(playerAgents[1].getLocalName()) == null) {
-						System.out.println("One of the players did not respond properly. The game is canceled.");
-						step = 4;
+						System.out.println("One of the players did not respond. The game is canceled.");
+
+						//Define Result as a failure to start the game
+						result = Results.FAILURE;
+						step = 3;
 						break;
-					}
-					for (int i = 0; i < 2; i++){
-						if ( !playerActions.get(playerAgents[i].getLocalName()).equals("rock") && !playerActions.get(playerAgents[i].getLocalName()).equals("paper") && !playerActions.get(playerAgents[i].getLocalName()).equals("scissors")) {
-							System.out.println("Player" + i + " did not respond properly. The game is canceled.");
-							step = 4; //TODO Find another way to finish the game, perhaps send a message to the player who hasn't responded properly
-							break;
-						}
-					}
-					if (playerActions.get(playerAgents[0].getLocalName()).equals(playerActions.get(playerAgents[1].getLocalName()))) {
-						System.out.println("It's a tie! Both players played " + playerActions.get(playerAgents[0].getLocalName()));
-						score.put("ties", score.get("ties") + 1);
-						winner = "tie";
-					} else if (playerActions.get(playerAgents[0].getLocalName()).equals("rock") && playerActions.get(playerAgents[1].getLocalName()).equals("scissors") ||
-							playerActions.get(playerAgents[0].getLocalName()).equals("paper") && playerActions.get(playerAgents[1].getLocalName()).equals("rock") ||
-							playerActions.get(playerAgents[0].getLocalName()).equals("scissors") && playerActions.get(playerAgents[1].getLocalName()).equals("paper")) {
-						System.out.println(playerAgents[0].getLocalName() + " wins!");
-						score.put(playerAgents[0].getLocalName(), score.get(playerAgents[0].getLocalName()) + 1);
-						winner = playerAgents[0].getLocalName();
+
 					} else {
-						System.out.println(playerAgents[1].getLocalName() + " wins!");
-						score.put(playerAgents[1].getLocalName(), score.get(playerAgents[1].getLocalName()) + 1);
-						winner = playerAgents[1].getLocalName();
+
+						for (int i = 0; i < 2; i++){
+							if ( !playerActions.get(playerAgents[i].getLocalName()).equals("rock") && !playerActions.get(playerAgents[i].getLocalName()).equals("paper") && !playerActions.get(playerAgents[i].getLocalName()).equals("scissors")) {
+								System.out.println("Player" + (i+1) + " did not respond properly. The game is canceled.");
+
+								//Define Result as a failure to start the game
+								result = Results.FAILURE;
+								step = 3; 
+								break;
+							}
+						}
+						if (playerActions.get(playerAgents[0].getLocalName()).equals(playerActions.get(playerAgents[1].getLocalName()))) {
+							System.out.println("It's a tie! Both players played " + playerActions.get(playerAgents[0].getLocalName()));
+
+							// Define the result as a draw
+							score.put("ties", score.get("ties") + 1);
+							result = Results.DRAW;
+
+						} else if (playerActions.get(playerAgents[0].getLocalName()).equals("rock") && playerActions.get(playerAgents[1].getLocalName()).equals("scissors") ||
+								playerActions.get(playerAgents[0].getLocalName()).equals("paper") && playerActions.get(playerAgents[1].getLocalName()).equals("rock") ||
+								playerActions.get(playerAgents[0].getLocalName()).equals("scissors") && playerActions.get(playerAgents[1].getLocalName()).equals("paper")) {
+									// TODO Is there a better approach to this?
+							System.out.println(playerAgents[0].getLocalName() + " wins!");
+
+							// Define the result as player 1 wins
+							score.put(playerAgents[0].getLocalName(), score.get(playerAgents[0].getLocalName()) + 1);
+							result = Results.P1_WINS;
+
+						} else {
+							System.out.println(playerAgents[1].getLocalName() + " wins!");
+
+							// Define the result as player 2 wins
+							score.put(playerAgents[1].getLocalName(), score.get(playerAgents[1].getLocalName()) + 1);
+							result = Results.P2_WINS;
+
+						}
+						myGui.updateScore();
+						step = 3; //TODO Define a score limit to the game
+						break;
+
 					}
-					myGui.updateScore();
-					step = 3; //TODO Define a score limit to the game
-					break;
-				case 3: // Step 3: Send the result to players
-					//TODO send the result to the players
 					
-
-					for (int i =0; i < 2; i++) {
-						int opponent_index;
-						if (i == 0) opponent_index = 1;
-						else opponent_index = 0;
-						ACLMessage inform = new ACLMessage(ACLMessage.INFORM);
-						inform.addReceiver(playerAgents[i]);
-						inform.setConversationId("RPS-game-result");
-						inform.setConversationId("inform"+ System.currentTimeMillis());
-						//Use JSON to send result content (Better structured)
-						// Construct the JSON content
-						String opponentAction = playerActions.get(playerAgents[opponent_index].getLocalName());
-						String winner = "Player 1"; // Replace with the logic to determine the winner
-
-						inform.setContent("Opponent action: " + playerActions.get(playerAgents[opponent_index].getLocalName()) + " | Result: " + winner);
-						myAgent.send(inform);
+				case 3: // Step 3: Send the result to players
+					for (int i = 0; i < 2; i++) {
+						int messageType;
+						String conversationIdPrefix;
+						switch (result){
+							case DRAW:
+								messageType = ACLMessage.INFORM;
+								conversationIdPrefix = "inform";
+								break;
+							case P1_WINS:
+								if (i == 0) {
+									messageType = ACLMessage.ACCEPT_PROPOSAL;
+									conversationIdPrefix = "accept";
+								} else {
+									messageType = ACLMessage.REJECT_PROPOSAL;
+									conversationIdPrefix = "reject";
+								}
+								break;
+							case P2_WINS:
+								if (i == 1) {
+									messageType = ACLMessage.ACCEPT_PROPOSAL;
+									conversationIdPrefix = "accept";
+								} else {
+									messageType = ACLMessage.REJECT_PROPOSAL;
+									conversationIdPrefix = "reject";
+								}
+								break;
+							default:
+								// In case of failure we send the info to both players
+								// even to the player that did not cause the error
+								// perhaps adapt message content to inform the player of the error
+								// if the error is caused by the player maybe the message can cause the player to reset??
+								System.out.println("Error: Result not defined");
+								messageType = ACLMessage.FAILURE;
+								conversationIdPrefix = "failure";
+								break;
+						}
+						ACLMessage message = new ACLMessage(messageType);
+						message.addReceiver(playerAgents[i]);
+						message.setConversationId(conversationIdPrefix + System.currentTimeMillis());
+						//Here adapt content if error message perhaps
+						message.setContent(playerActions.get(playerAgents[1-i].getLocalName()));
+						myAgent.send(message);
 					}
 					step = 4;
 					break;
+				}
 
-			}
 		}
 
 		public boolean done() { // PLACEHOLDER to finish the behaviour
 			//process terminates here if the game is canceled or if the game is finished
-
-			//TODO Add the possibility to finish the game if there's a problem
 			return step == 4;
 		}
 	}
