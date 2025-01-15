@@ -96,48 +96,47 @@ public class PlayerAgent extends Agent {
 			}
 		}
 
-	    private String findMostFrequentMove(Map<String, Integer> choices) {
-	        String mostFrequentMove = "rock";
-	        int maxCount = 0;
+	    // Method to find the most frequent move of the opponent
+    	private String findMostFrequentMove() {
+        	return opponentChoices.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("rock"); // Default to "rock" if no moves are recorded
+    	}
 
-	        for (Map.Entry<String, Integer> entry : choices.entrySet()) {
-	            if (entry.getValue() > maxCount) {
-	                maxCount = entry.getValue();
-	                mostFrequentMove = entry.getKey();
-	            }
-	        }
-	        return mostFrequentMove;
-	    }
+		// Method to adapt probabilities based on the opponent's most frequent move
+		private void adaptProbabilities() {
+			String mostFrequentMove = findMostFrequentMove();
+			double adjustmentFactor = 0.1; // Factor to adjust probabilities dynamically
+	
+			switch (mostFrequentMove) {
+				case "rock":
+					probabilities.put("rock", Math.max(0.1, probabilities.get("rock") - adjustmentFactor));
+					probabilities.put("paper", Math.min(0.8, probabilities.get("paper") + adjustmentFactor)); // Paper beats rock
+					probabilities.put("scissors", Math.max(0.1, probabilities.get("scissors") - adjustmentFactor));
+					break;
+				case "paper":
+					probabilities.put("rock", Math.min(0.8, probabilities.get("rock") + adjustmentFactor)); // Rock beats paper
+					probabilities.put("paper", Math.max(0.1, probabilities.get("paper") - adjustmentFactor));
+					probabilities.put("scissors", Math.max(0.1, probabilities.get("scissors") - adjustmentFactor));
+					break;
+				case "scissors":
+					probabilities.put("rock", Math.max(0.1, probabilities.get("rock") - adjustmentFactor));
+					probabilities.put("paper", Math.max(0.1, probabilities.get("paper") - adjustmentFactor));
+					probabilities.put("scissors", Math.min(0.8, probabilities.get("scissors") + adjustmentFactor)); // Scissors beat paper
+					break;
+			}
+		}
 
-	    public String calculatePlayerAction() {
-	        if (turnCounter < RANDOM_TURNS) {
-	            double random = Math.random();
-	            double cumulativeProbability = 0.0;
-	            for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
-	                cumulativeProbability += entry.getValue();
-	                if (random < cumulativeProbability) {
-	                    return entry.getKey();
-	                }
-	            }
-	        } else {
-	            double bluffChance = 0.2;
-	            if (Math.random() < bluffChance) {
-	                String mymostFrequentMove = findMostFrequentMove(myChoices);
-	                switch (mymostFrequentMove) {
-                    	case "rock": return "scissors";
-                    	case "paper": return "rock";
-                    	case "scissors": return "paper";
-	                }
-	            } else {
-	                String mostFrequentMove = findMostFrequentMove(opponentChoices);
-	                switch (mostFrequentMove) {
-	                    case "rock": return "paper";
-	                    case "paper": return "scissors";
-	                    case "scissors": return "rock";
-	                }
-	            }
-	        }
-	        return "rock"; // Default fallback
-	    }
+	    private String calculatePlayerAction() {
+			double rand = Math.random();
+			if (rand < probabilities.get("rock")) {
+				return "rock";
+			} else if (rand < probabilities.get("rock") + probabilities.get("paper")) {
+				return "paper";
+			} else {
+				return "scissors";
+			}
+		}
 	}
 }
