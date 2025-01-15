@@ -93,11 +93,9 @@ public class MenuAgent extends Agent {
 
 		enum Results {
 			FAILURE,
-			P1_WINS,
-			P2_WINS,
-			DRAW
+			SUCCESS
 		}
-		private Results result;
+		private Results gameStatus;
 
 		public void action() {
 			switch (step) {
@@ -142,7 +140,7 @@ public class MenuAgent extends Agent {
 						long end = System.currentTimeMillis();
 						if (end - start >= 10000) {
 							System.out.println("Time has expired. The game is canceled due to lack of response from a player");
-							result = Results.FAILURE;
+							gameStatus = Results.FAILURE;
 							step = 4;
 						} else {
 							block(1000); // Wait for 1 second before checking again
@@ -158,7 +156,7 @@ public class MenuAgent extends Agent {
 						System.out.println("One of the players did not respond. The game is canceled.");
 
 						//Define Result as a failure to start the game
-						result = Results.FAILURE;
+						gameStatus = Results.FAILURE;
 						step = 3;
 						break;
 
@@ -169,7 +167,7 @@ public class MenuAgent extends Agent {
 								System.out.println("Player" + (i+1) + " did not respond properly. The game is canceled.");
 
 								//Define Result as a failure to start the game
-								result = Results.FAILURE;
+								gameStatus = Results.FAILURE;
 								step = 3; 
 								break;
 							}
@@ -179,7 +177,6 @@ public class MenuAgent extends Agent {
 
 							// Define the result as a draw
 							score.put("ties", score.get("ties") + 1);
-							result = Results.DRAW;
 
 						} else if (playerActions.get(playerAgents[0].getLocalName()).equals("rock") && playerActions.get(playerAgents[1].getLocalName()).equals("scissors") ||
 								playerActions.get(playerAgents[0].getLocalName()).equals("paper") && playerActions.get(playerAgents[1].getLocalName()).equals("rock") ||
@@ -189,64 +186,46 @@ public class MenuAgent extends Agent {
 
 							// Define the result as player 1 wins
 							score.put(playerAgents[0].getLocalName(), score.get(playerAgents[0].getLocalName()) + 1);
-							result = Results.P1_WINS;
 
 						} else {
 							System.out.println(playerAgents[1].getLocalName() + " wins!");
 
 							// Define the result as player 2 wins
 							score.put(playerAgents[1].getLocalName(), score.get(playerAgents[1].getLocalName()) + 1);
-							result = Results.P2_WINS;
 
 						}
 						myGui.updateScore();
+						gameStatus = Results.SUCCESS;
 						step = 3; //TODO Define a score limit to the game
 						break;
 
 					}
 					
 				case 3: // Step 3: Send the result to players
-					for (int i = 0; i < 2; i++) {
+					if (gameStatus == null) {
+						System.out.println("Error: Result not defined");
+						step = 4;
+						break;
+					}
+					for (int i = 0; i < 2; i++){
 						int messageType;
 						String conversationIdPrefix;
-						switch (result){
-							case DRAW:
+						String msgContent;
+						switch (gameStatus){
+							case SUCCESS:
 								messageType = ACLMessage.INFORM;
 								conversationIdPrefix = "inform";
-								break;
-							case P1_WINS:
-								if (i == 0) {
-									messageType = ACLMessage.ACCEPT_PROPOSAL;
-									conversationIdPrefix = "accept";
-								} else {
-									messageType = ACLMessage.REJECT_PROPOSAL;
-									conversationIdPrefix = "reject";
-								}
-								break;
-							case P2_WINS:
-								if (i == 1) {
-									messageType = ACLMessage.ACCEPT_PROPOSAL;
-									conversationIdPrefix = "accept";
-								} else {
-									messageType = ACLMessage.REJECT_PROPOSAL;
-									conversationIdPrefix = "reject";
-								}
+								msgContent = playerActions.get(playerAgents[1-i].getLocalName());
 								break;
 							default:
-								// In case of failure we send the info to both players
-								// even to the player that did not cause the error
-								// perhaps adapt message content to inform the player of the error
-								// if the error is caused by the player maybe the message can cause the player to reset??
-								System.out.println("Error: Result not defined");
 								messageType = ACLMessage.FAILURE;
 								conversationIdPrefix = "failure";
-								break;
+								msgContent = "The game was canceled"; //default message, to be adapted later on
 						}
 						ACLMessage message = new ACLMessage(messageType);
 						message.addReceiver(playerAgents[i]);
 						message.setConversationId(conversationIdPrefix + System.currentTimeMillis());
-						//Here adapt content if error message perhaps
-						message.setContent(playerActions.get(playerAgents[1-i].getLocalName()));
+						message.setContent(msgContent);
 						myAgent.send(message);
 					}
 					step = 4;
