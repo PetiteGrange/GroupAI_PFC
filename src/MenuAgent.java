@@ -140,6 +140,7 @@ public class MenuAgent extends Agent {
 						long end = System.currentTimeMillis();
 						if (end - start >= 10000) {
 							System.out.println("Time has expired. The game is canceled due to lack of response from a player");
+							result = Results.FAILURE;
 							step = 4;
 						} else {
 							block(1000); // Wait for 1 second before checking again
