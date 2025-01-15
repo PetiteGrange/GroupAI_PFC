@@ -151,6 +151,7 @@ public class PlayerAgent extends Agent {
 	        }
 
 	        updateProbabilities();
+			myGui.updateProbabilities();
 
 	        double strategySelector = Math.random();
 
@@ -181,4 +182,8 @@ public class PlayerAgent extends Agent {
 
 	        return "rock"; // Fallback par défaut
 	    }
+
+
+	}
+
 }
