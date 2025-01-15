@@ -76,7 +76,7 @@ class PlayerAgentGui extends JFrame {
 
         // Add panel to frame
         getContentPane().add(p);
-        pack(); // Adjust the window size to fit components
+        this.setSize(250, 220);
     }
 
     public void updateProbabilities() {
@@ -86,7 +86,6 @@ class PlayerAgentGui extends JFrame {
     }
 
     public void display() {
-        pack();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int centerX = (int)screenSize.getWidth() / 2;
         int centerY = (int)screenSize.getHeight() / 2;
