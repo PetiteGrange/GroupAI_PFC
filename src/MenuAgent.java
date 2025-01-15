@@ -142,6 +142,7 @@ public class MenuAgent extends Agent {
 						long end = System.currentTimeMillis();
 						if (end - start >= 10000) {
 							System.out.println("Time has expired. The game is canceled due to lack of response from a player");
+							result = Results.FAILURE;
 							step = 4;
 						} else {
 							block(1000); // Wait for 1 second before checking again
@@ -205,11 +206,6 @@ public class MenuAgent extends Agent {
 					}
 					
 				case 3: // Step 3: Send the result to players
-					if (result == null) {
-						System.out.println("Error: Result not defined");
-						step = 4;
-						break;
-					}
 					for (int i = 0; i < 2; i++) {
 						int messageType;
 						String conversationIdPrefix;
@@ -241,6 +237,7 @@ public class MenuAgent extends Agent {
 								// even to the player that did not cause the error
 								// perhaps adapt message content to inform the player of the error
 								// if the error is caused by the player maybe the message can cause the player to reset??
+								System.out.println("Error: Result not defined");
 								messageType = ACLMessage.FAILURE;
 								conversationIdPrefix = "failure";
 								break;
