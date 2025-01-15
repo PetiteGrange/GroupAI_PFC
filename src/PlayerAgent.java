@@ -113,8 +113,8 @@ public class PlayerAgent extends Agent {
 	    	
 	        String mostFrequentMove = findMostFrequentMove(opponentChoices);
 	        
-	        double increase = 0.1; 
-	        double decrease = 0.05; 
+	        double increase = 0.01; 
+	        double decrease = 0.005; 
 	        
 	        switch (mostFrequentMove) {
 	            case "rock":
@@ -182,8 +182,7 @@ public class PlayerAgent extends Agent {
 
 	        return "rock"; // Fallback par défaut
 	    }
-
-
 	}
+}
 
 }
