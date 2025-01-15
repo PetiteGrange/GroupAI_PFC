@@ -95,7 +95,7 @@ public class MenuAgent extends Agent {
 			FAILURE,
 			SUCCESS
 		}
-		private Results gameSatus;
+		private Results gameStatus;
 
 		public void action() {
 			switch (step) {
@@ -155,7 +155,7 @@ public class MenuAgent extends Agent {
 						System.out.println("One of the players did not respond. The game is canceled.");
 
 						//Define Result as a failure to start the game
-						gameSatus = Results.FAILURE;
+						gameStatus = Results.FAILURE;
 						step = 3;
 						break;
 
@@ -166,7 +166,7 @@ public class MenuAgent extends Agent {
 								System.out.println("Player" + (i+1) + " did not respond properly. The game is canceled.");
 
 								//Define Result as a failure to start the game
-								gameSatus = Results.FAILURE;
+								gameStatus = Results.FAILURE;
 								step = 3; 
 								break;
 							}
@@ -194,14 +194,14 @@ public class MenuAgent extends Agent {
 
 						}
 						myGui.updateScore();
-						gameSatus = Results.SUCCESS;
+						gameStatus = Results.SUCCESS;
 						step = 3; //TODO Define a score limit to the game
 						break;
 
 					}
 					
 				case 3: // Step 3: Send the result to players
-					if (gameSatus == null) {
+					if (gameStatus == null) {
 						System.out.println("Error: Result not defined");
 						step = 4;
 						break;
@@ -210,7 +210,7 @@ public class MenuAgent extends Agent {
 						int messageType;
 						String conversationIdPrefix;
 						String msgContent;
-						switch (gameSatus){
+						switch (gameStatus){
 							case SUCCESS:
 								messageType = ACLMessage.INFORM;
 								conversationIdPrefix = "inform";
