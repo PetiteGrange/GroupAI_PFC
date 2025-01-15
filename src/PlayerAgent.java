@@ -117,19 +117,19 @@ public class PlayerAgent extends Agent {
 	        double decrease = 0.005; 
 	        
 	        switch (mostFrequentMove) {
-	            case "rock":
+	            case "scissors":
 	                probabilities.put("rock", Math.min(probabilities.get("rock") + increase, 1.0));
 	                probabilities.put("paper", Math.max(probabilities.get("paper") - decrease, 0.0));
 	                probabilities.put("scissors", Math.max(probabilities.get("scissors") - decrease, 0.0));
 	                break;
 
-	            case "paper":
+	            case "rock":
 	                probabilities.put("paper", Math.min(probabilities.get("paper") + increase, 1.0));
 	                probabilities.put("rock", Math.max(probabilities.get("rock") - decrease, 0.0));
 	                probabilities.put("scissors", Math.max(probabilities.get("scissors") - decrease, 0.0));
 	                break;
 
-	            case "scissors":
+	            case "paper":
 	                probabilities.put("scissors", Math.min(probabilities.get("scissors") + increase, 1.0));
 	                probabilities.put("rock", Math.max(probabilities.get("rock") - decrease, 0.0));
 	                probabilities.put("paper", Math.max(probabilities.get("paper") - decrease, 0.0));
