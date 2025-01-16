@@ -15,6 +15,14 @@ public class PlayerAgent extends Agent {
 	private Map<String, Double> probabilities = new HashMap<>(); // probabilities of playing rock, paper, scissors
 	private Map<String, Integer> opponentChoices = new HashMap<>(); // used to track opponent's choices
 
+	protected enum Strategy {
+		RANDOM, // Randomly choose between rock, paper, scissors
+		ROCK, // Chooses rock 80% of the time, paper 10%, scissors 10%
+		PAPER, // Chooses paper 80% of the time, rock 10%, scissors 10%
+		SCISSORS, // Chooses scissors 80% of the time, rock 10%, paper 10%
+		ADAPTATIVE // Our own strategy
+	}
+
 	protected void setup () {
 		// Initialize probabilities and opponent tracking
 		double rock = Math.random();
@@ -54,12 +62,40 @@ public class PlayerAgent extends Agent {
 		JOptionPane.showMessageDialog(null,message,"Message",JOptionPane.PLAIN_MESSAGE);
 	}
 
-	public void setStrategy(String strategy) {
-		// Set the probabilities based on the strategy
-			
-			//TODO PLACEHOLDER CODE
-
-	}
+	public void setStrategy(Strategy strategy) { //TODO THERE IS A BUG THERE BUT DUNNO HOW TO FIX
+        // Set the probabilities based on the strategy
+        switch (Strategy.valueOf(strategy)) {
+            case RANDOM:
+                probabilities.put("rock", 1.0 / 3);
+                probabilities.put("paper", 1.0 / 3);
+                probabilities.put("scissors", 1.0 / 3);
+                break;
+            case ROCK:
+                probabilities.put("rock", 0.8);
+                probabilities.put("paper", 0.1);
+                probabilities.put("scissors", 0.1);
+                break;
+            case PAPER:
+                probabilities.put("rock", 0.1);
+                probabilities.put("paper", 0.8);
+                probabilities.put("scissors", 0.1);
+                break;
+            case SCISSORS:
+                probabilities.put("rock", 0.1);
+                probabilities.put("paper", 0.1);
+                probabilities.put("scissors", 0.8);
+                break;
+			case ADAPTATIVE:
+				//TODO To merge with the strategy
+				break;
+			default:
+				System.out.println("ERROR: Unknown strategy! Defaulting to RANDOM");
+				probabilities.put("rock", 1.0 / 3);
+                probabilities.put("paper", 1.0 / 3);
+                probabilities.put("scissors", 1.0 / 3);
+                break;
+        }
+    }
 
 	private class GameBehaviour extends CyclicBehaviour {
 		public void action() {

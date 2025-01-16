@@ -1,6 +1,9 @@
 package jadelab1;
 
 import javax.swing.*;
+
+import jadelab1.PlayerAgent.Strategy;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,8 +15,7 @@ class PlayerAgentGui extends JFrame {
     private JLabel paperProbLabel;
     private JLabel scissorsProbLabel;
 
-    private JComboBox<String> strategyComboBox;
-    private String[] strategies = {"Random", "Rock", "Paper", "Scissors"};
+    private JComboBox<Strategy> strategyComboBox;
 
     public PlayerAgentGui(PlayerAgent a) {
         super(a.getLocalName());
@@ -62,7 +64,7 @@ class PlayerAgentGui extends JFrame {
         p.add(scissorsProbLabel, gbc);
 
         // Combobox for strategy
-        strategyComboBox = new JComboBox<>(strategies);
+        strategyComboBox = new JComboBox<>(Strategy.values());
         strategyComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
