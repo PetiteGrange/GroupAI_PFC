@@ -30,7 +30,7 @@ public class PlayerAgent extends Agent {
 		REACTIVE // Plays the counter move to the opponent's last move
 	}
 	
-	private Strategy currentStrategy = Strategy.RANDOM;
+	private Strategy currentStrategy = Strategy.ONESHOT;
 
 	protected void setup () {
 		// Initialize probabilities and opponent tracking
