@@ -82,6 +82,7 @@ class PlayerAgentGui extends JFrame {
     }
 
     public void updateProbabilities() {
+        System.out.println("Updating probabilities: rock = " + myAgent.getProbabilities().get("rock") + ", paper = " + myAgent.getProbabilities().get("paper") + ", scissors = " + myAgent.getProbabilities().get("scissors"));
         rockProbLabel.setText(String.format("%.3f", myAgent.getProbabilities().get("rock")));
         paperProbLabel.setText(String.format("%.3f", myAgent.getProbabilities().get("paper")));
         scissorsProbLabel.setText(String.format("%.3f", myAgent.getProbabilities().get("scissors")));

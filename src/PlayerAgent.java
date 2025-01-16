@@ -14,6 +14,9 @@ public class PlayerAgent extends Agent {
 	private PlayerAgentGui myGui;
 	private Map<String, Double> probabilities = new HashMap<>(); // probabilities of playing rock, paper, scissors
 	private Map<String, Integer> opponentChoices = new HashMap<>(); // used to track opponent's choices
+	private Map<String, Integer> myChoices = new HashMap<>(); //used to track our choices for bluff strategy
+	private int turnCounter = 0; // counts the number of turns played
+    private static final int RANDOM_TURNS = 10; // number of turns to play randomly
 
 	protected enum Strategy {
 		RANDOM, // Randomly choose between rock, paper, scissors
@@ -22,6 +25,8 @@ public class PlayerAgent extends Agent {
 		SCISSORS, // Chooses scissors 80% of the time, rock 10%, paper 10%
 		ADAPTATIVE // Our own strategy
 	}
+	
+	private Strategy currentStrategy = Strategy.RANDOM;
 
 	protected void setup () {
 		// Initialize probabilities and opponent tracking
@@ -63,12 +68,12 @@ public class PlayerAgent extends Agent {
 	}
 
 	public void setStrategy(String strategy) {
-        // Set the probabilities based on the strategy
+		currentStrategy = Strategy.valueOf(strategy);
         switch (Strategy.valueOf(strategy)) {
             case RANDOM:
                 probabilities.put("rock", 1.0 / 3);
                 probabilities.put("paper", 1.0 / 3);
-                probabilities.put("scissors", 1.0 / 3);
+                probabilities.put("scissors", 1.0 / 3);	
                 break;
             case ROCK:
                 probabilities.put("rock", 0.8);
@@ -86,7 +91,6 @@ public class PlayerAgent extends Agent {
                 probabilities.put("scissors", 0.8);
                 break;
 			case ADAPTATIVE:
-				//TODO To merge with the strategy
 				break;
 			default:
 				System.out.println("ERROR: Unknown strategy! Defaulting to RANDOM");
@@ -111,17 +115,25 @@ public class PlayerAgent extends Agent {
 					reply.setPerformative(ACLMessage.PROPOSE);
 					// Calculating player action
 					String move = calculatePlayerAction();
+					
+					myChoices.put(move, myChoices.getOrDefault(move, 0) + 1);
+					
 					//Preparing the reply
 					reply.setContent(move);
 					reply.setConversationId(message.getConversationId());
 					reply.setInReplyTo(message.getReplyWith());
 					myAgent.send(reply);
+
+					turnCounter++;
+					
 					System.out.println(getAID().getLocalName() + ": has sent what he played. He played: " + move);
 				} else if (message.getPerformative() == ACLMessage.INFORM) {
 					//Handling the result of the game
 					String content = message.getContent();
 					System.out.println(myAgent.getLocalName() + " received this message: " + content);
-
+					//Parse string to get info about opponent action + result
+					opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1); //Hashmap needs to have each move possible with the numbers of time they were played
+					
 				} else {
 					block();
 				}
@@ -129,19 +141,102 @@ public class PlayerAgent extends Agent {
 				block();
 			}
 		}
+		
+		private String calculatePlayerAction() {
+            switch (currentStrategy) {
+                case RANDOM:
+                case ROCK:
+                case PAPER:
+                case SCISSORS:
+                    return selectBasedOnProbabilities();
 
-		public String calculatePlayerAction() {
-			double random = Math.random();
-			double cumulativeProbability = 0.0;
+                case ADAPTATIVE:
+                    if (turnCounter < RANDOM_TURNS) {
+                        return selectBasedOnProbabilities();
+                    }
 
-			for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
-				cumulativeProbability += entry.getValue();
-				if (random < cumulativeProbability) {
-					return entry.getKey();
-				}
-			}
-			// Fallback (shouldn't happen if probabilities sum to 1)
-			throw new IllegalStateException(getAID().getLocalName() + ": Probabilities do not sum to 1!");
-		}
+                    updateProbabilities();
+                    myGui.updateProbabilities();
+
+                    double strategySelector = Math.random();
+                    if (strategySelector < 0.4) {
+                        return selectBasedOnProbabilities();
+                    } else if (strategySelector < 0.7) {
+                        return counterOpponentMostFrequent();
+                    } else {
+                        return counterOwnMostFrequent();
+                    }
+
+                default:
+                    return "rock"; // Fallback
+            }
+        }
+
+        private String selectBasedOnProbabilities() {
+            double random = Math.random();
+            double cumulativeProbability = 0.0;
+            for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
+                cumulativeProbability += entry.getValue();
+                if (random < cumulativeProbability) {
+                    return entry.getKey();
+                }
+            }
+            return "rock"; // Fallback
+        }
+
+        private String counterOpponentMostFrequent() {
+            String mostFrequent = findMostFrequentMove(opponentChoices);
+            switch (mostFrequent) {
+                case "rock": return "paper";
+                case "paper": return "scissors";
+                case "scissors": return "rock";
+                default: return "rock";
+            }
+        }
+
+        private String counterOwnMostFrequent() {
+            String mostFrequent = findMostFrequentMove(myChoices);
+            switch (mostFrequent) {
+                case "rock": return "scissors";
+                case "paper": return "rock";
+                case "scissors": return "paper";
+                default: return "rock";
+            }
+        }
+
+        private String findMostFrequentMove(Map<String, Integer> choices) {
+            return choices.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("rock");
+        }
+
+        private void updateProbabilities() {
+            String mostFrequent = findMostFrequentMove(opponentChoices);
+            switch (mostFrequent) {
+                case "rock":
+                    adjustProbabilities("paper", "scissors", "rock");
+                    break;
+                case "paper":
+                    adjustProbabilities("scissors", "rock", "paper");
+                    break;
+                case "scissors":
+                    adjustProbabilities("rock", "paper", "scissors");
+                    break;
+            }
+        }
+
+        private void adjustProbabilities(String increaseKey, String decreaseKey1, String decreaseKey2) {
+            double increase = 0.01, decrease = 0.005;
+            probabilities.put(increaseKey, Math.min(probabilities.get(increaseKey) + increase, 1.0));
+            probabilities.put(decreaseKey1, Math.max(probabilities.get(decreaseKey1) - decrease, 0.0));
+            probabilities.put(decreaseKey2, Math.max(probabilities.get(decreaseKey2) - decrease, 0.0));
+            normalizeProbabilities();
+        }
+
+        private void normalizeProbabilities() {
+            double total = probabilities.values().stream().mapToDouble(Double::doubleValue).sum();
+            probabilities.replaceAll((key, value) -> value / total);
+        }
 	}
 }
