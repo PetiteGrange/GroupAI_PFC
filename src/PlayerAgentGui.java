@@ -1,7 +1,12 @@
 package jadelab1;
 
 import javax.swing.*;
+
+import jadelab1.PlayerAgent.Strategy;
+
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 class PlayerAgentGui extends JFrame {
     private PlayerAgent myAgent;
@@ -9,7 +14,10 @@ class PlayerAgentGui extends JFrame {
     private JLabel rockProbLabel;
     private JLabel paperProbLabel;
     private JLabel scissorsProbLabel;
-    PlayerAgentGui(PlayerAgent a) {
+
+    private JComboBox<Strategy> strategyComboBox;
+
+    public PlayerAgentGui(PlayerAgent a) {
         super(a.getLocalName());
         myAgent = a;
 
@@ -26,6 +34,8 @@ class PlayerAgentGui extends JFrame {
         gbc.gridy = 0;
         gbc.gridwidth = 2; // Span two columns
         p.add(title, gbc);
+
+        //TODO Limiter les décimales à 4
 
         // Label for rock
         gbc.gridwidth = 1; // Reset grid width
@@ -55,9 +65,22 @@ class PlayerAgentGui extends JFrame {
         scissorsProbLabel.setHorizontalAlignment(SwingConstants.CENTER);
         p.add(scissorsProbLabel, gbc);
 
+        // Combobox for strategy
+        strategyComboBox = new JComboBox<>(Strategy.values());
+        strategyComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Strategy selectedStrategy = (Strategy) strategyComboBox.getSelectedItem();
+                myAgent.setStrategy(selectedStrategy.name());
+            }
+        });
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        p.add(strategyComboBox, gbc);
+
         // Add panel to frame
         getContentPane().add(p);
-        pack(); // Adjust the window size to fit components
+        this.setSize(250, 220);
     }
 
     public void updateProbabilities() {
@@ -67,7 +90,6 @@ class PlayerAgentGui extends JFrame {
     }
 
     public void display() {
-        pack();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int centerX = (int)screenSize.getWidth() / 2;
         int centerY = (int)screenSize.getHeight() / 2;
