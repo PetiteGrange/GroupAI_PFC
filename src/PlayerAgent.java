@@ -26,7 +26,7 @@ public class PlayerAgent extends Agent {
 		PAPER, // Chooses paper 80% of the time, rock 10%, scissors 10%
 		SCISSORS, // Chooses scissors 80% of the time, rock 10%, paper 10%
 		ADAPTATIVE, // Our own strategy
-    SHORT_ADAPTATIVE // Our own strategy, we reset the saved opponent choices after a certain number of turns
+        SHORT_ADAPTATIVE, // Our own strategy, we reset the saved opponent choices after a certain number of turns
 		REACTIVE // Plays the counter move to the opponent's last move
 	}
 	
