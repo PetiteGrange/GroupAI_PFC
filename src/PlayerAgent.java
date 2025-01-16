@@ -95,6 +95,8 @@ public class PlayerAgent extends Agent {
                 probabilities.put("scissors", 1.0 / 3);
                 break;
         }
+		myGui.updateProbabilities();
+		System.out.println("Strategy set to: " + strategy);
     }
 
 	private class GameBehaviour extends CyclicBehaviour {

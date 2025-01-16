@@ -35,6 +35,8 @@ class PlayerAgentGui extends JFrame {
         gbc.gridwidth = 2; // Span two columns
         p.add(title, gbc);
 
+        //TODO Limiter les décimales à 4
+
         // Label for rock
         gbc.gridwidth = 1; // Reset grid width
         gbc.gridx = 0;
