@@ -26,6 +26,7 @@ public class PlayerAgent extends Agent {
 		PAPER, // Chooses paper 80% of the time, rock 10%, scissors 10%
 		SCISSORS, // Chooses scissors 80% of the time, rock 10%, paper 10%
 		ADAPTATIVE, // Our own strategy
+    SHORT_ADAPTATIVE // Our own strategy, we reset the saved opponent choices after a certain number of turns
 		REACTIVE // Plays the counter move to the opponent's last move
 	}
 	
@@ -101,7 +102,7 @@ public class PlayerAgent extends Agent {
 				probabilities.put("paper", paper);
 				probabilities.put("scissors", scissors);
 				break;
-			case ADAPTATIVE:
+			case ADAPTATIVE, SHORT_ADAPTATIVE:
 				break;
 			case REACTIVE:
 				probabilities.put("rock", 1.0 / 3);
@@ -169,29 +170,31 @@ public class PlayerAgent extends Agent {
                 case PAPER:
                 case SCISSORS:
                     return selectBasedOnProbabilities();
-
 				case REACTIVE:
 					return calculateReactiveMove();
+        case ADAPTATIVE, SHORT_ADAPTATIVE:
+            if (turnCounter < RANDOM_TURNS) {
+                return selectBasedOnProbabilities();
+            }
+            // Reset the opponent choices after a certain number of turns
+            if (currentStrategy == Strategy.SHORT_ADAPTATIVE && turnCounter % 10 == 0) {
+                opponentChoices.clear();
+            }
 
-                case ADAPTATIVE:
-                    if (turnCounter < RANDOM_TURNS) {
-                        return selectBasedOnProbabilities();
-                    }
+            updateProbabilities();
+            myGui.updateProbabilities();
 
-                    updateProbabilities();
-                    myGui.updateProbabilities();
+            double strategySelector = Math.random();
+            if (strategySelector < 0.4) {
+                return selectBasedOnProbabilities();
+            } else if (strategySelector < 0.7) {
+                return counterOpponentMostFrequent();
+            } else {
+                return counterOwnMostFrequent();
+            }
 
-                    double strategySelector = Math.random();
-                    if (strategySelector < 0.4) {
-                        return selectBasedOnProbabilities();
-                    } else if (strategySelector < 0.7) {
-                        return counterOpponentMostFrequent();
-                    } else {
-                        return counterOwnMostFrequent();
-                    }
-
-                default:
-                    return "rock"; // Fallback
+        default:
+            return "rock"; // Fallback
             }
         }
 
