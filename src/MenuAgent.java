@@ -72,6 +72,10 @@ public class MenuAgent extends Agent {
 		System.out.println("Menu agent " + getAID().getLocalName() + " terminated.");
 	}
 
+	public void setRoundsToPlay(int rounds) {
+		roundsToPlay = rounds;
+	}
+
 	public Map<String, Integer> getScore() {
 		return score;
 	}
@@ -83,7 +87,7 @@ public class MenuAgent extends Agent {
 	public void playRound() {
 		int round = 0;
 		while (round < roundsToPlay){
-			System.out.println("==== Now Starting Round " + round + " ====");
+			System.out.println("==== Now Starting Round " + (round+1) + " ====");
 			ControllerBehaviour behaviour = new ControllerBehaviour();
 			addBehaviour(behaviour);
 
