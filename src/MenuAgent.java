@@ -15,6 +15,7 @@ public class MenuAgent extends Agent {
 	private MenuAgentGui myGui;
 	private Map<String, Integer> score = new HashMap<>();
 	private AID[] playerAgents; // list of known player agents
+	private int roundsToPlay = 2;
 
 	protected void setup () {
 		// Before starting the game, we need to identify our players
@@ -80,11 +81,27 @@ public class MenuAgent extends Agent {
 	}
 
 	public void playRound() {
-		System.out.println("==== Now Starting a Round ====");
-		addBehaviour(new ControllerBehaviour());
+		int round = 0;
+		while (round < roundsToPlay){
+			System.out.println("==== Now Starting Round " + round + " ====");
+			ControllerBehaviour behaviour = new ControllerBehaviour();
+			addBehaviour(behaviour);
+
+			// Wait for the current behaviour to complete
+			while (!behaviour.done()) {
+				try {
+					Thread.sleep(100); // Small delay to prevent busy-waiting
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+			round++;
+		}
 	}
 
 	private class ControllerBehaviour extends Behaviour {
+		private boolean isDone = false;
 		private Map<String, String> playerActions = new HashMap<>();
 		private int step = 0;
 		private int repliesCnt = 0;
@@ -230,13 +247,16 @@ public class MenuAgent extends Agent {
 					}
 					step = 4;
 					break;
+				case 4:
+					isDone = true;
+					break;
 				}
 
 		}
 
 		public boolean done() { // PLACEHOLDER to finish the behaviour
 			//process terminates here if the game is canceled or if the game is finished
-			return step == 4;
+			return isDone;
 		}
 	}
 }
