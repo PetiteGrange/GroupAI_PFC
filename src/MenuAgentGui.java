@@ -9,6 +9,7 @@ public class MenuAgentGui extends JFrame {
     private JLabel player1Label;
     private JLabel tielabel;
     private JLabel player2label;
+    private JSpinner roundsSpinner;
     MenuAgentGui(MenuAgent a) {
         super(a.getLocalName());
         myAgent = a;
@@ -27,10 +28,23 @@ public class MenuAgentGui extends JFrame {
         gbc.gridwidth = 2; // Span two columns
         p.add(title, gbc);
 
-        // Play button
+        // Spinner for the number of rounds
         gbc.gridy = 1;
+        gbc.gridwidth = 1; // Reset grid width
+        gbc.gridx = 0;
+        p.add(new JLabel("Rounds to play:"), gbc);
+
+        roundsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1)); // Default: 1, Min: 1, Max: 100, Step: 1
+        gbc.gridx = 1;
+        p.add(roundsSpinner, gbc);
+
+        // Play button
+        gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2; // Span two columns
         JButton playButton = new JButton("Play");
         playButton.addActionListener(e -> {
+            myAgent.setRoundsToPlay((int) roundsSpinner.getValue());
             myAgent.playRound();
         });
         playButton.setHorizontalAlignment(SwingConstants.CENTER);
@@ -39,7 +53,7 @@ public class MenuAgentGui extends JFrame {
         // Label for player1
         gbc.gridwidth = 1; // Reset grid width
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         p.add(new JLabel(myAgent.getPlayerAgentName(0) + " Victories:"), gbc);
         gbc.gridx = 1;
         player1Label = new JLabel(String.valueOf(a.getScore().get(myAgent.getPlayerAgentName(0))));
@@ -48,7 +62,7 @@ public class MenuAgentGui extends JFrame {
 
         // Label for tie
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         p.add(new JLabel("Ties:"), gbc);
         gbc.gridx = 1;
         tielabel = new JLabel(String.valueOf(a.getScore().get("ties")));
@@ -57,7 +71,7 @@ public class MenuAgentGui extends JFrame {
 
         // Label for scissors
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         p.add(new JLabel(myAgent.getPlayerAgentName(1)+ " Victories:"), gbc);
         gbc.gridx = 1;
         player2label = new JLabel(String.valueOf(a.getScore().get(myAgent.getPlayerAgentName(1))));
