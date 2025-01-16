@@ -35,8 +35,6 @@ class PlayerAgentGui extends JFrame {
         gbc.gridwidth = 2; // Span two columns
         p.add(title, gbc);
 
-        //TODO Limiter les décimales à 4
-
         // Label for rock
         gbc.gridwidth = 1; // Reset grid width
         gbc.gridx = 0;
@@ -84,9 +82,9 @@ class PlayerAgentGui extends JFrame {
     }
 
     public void updateProbabilities() {
-        rockProbLabel.setText(String.valueOf(myAgent.getProbabilities().get("rock")));
-        paperProbLabel.setText(String.valueOf(myAgent.getProbabilities().get("paper")));
-        scissorsProbLabel.setText(String.valueOf(myAgent.getProbabilities().get("scissors")));
+        rockProbLabel.setText(String.format("%.3f", myAgent.getProbabilities().get("rock")));
+        paperProbLabel.setText(String.format("%.3f", myAgent.getProbabilities().get("paper")));
+        scissorsProbLabel.setText(String.format("%.3f", myAgent.getProbabilities().get("scissors")));
     }
 
     public void display() {

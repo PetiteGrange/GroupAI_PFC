@@ -181,7 +181,7 @@ public class MenuAgent extends Agent {
 						} else if (playerActions.get(playerAgents[0].getLocalName()).equals("rock") && playerActions.get(playerAgents[1].getLocalName()).equals("scissors") ||
 								playerActions.get(playerAgents[0].getLocalName()).equals("paper") && playerActions.get(playerAgents[1].getLocalName()).equals("rock") ||
 								playerActions.get(playerAgents[0].getLocalName()).equals("scissors") && playerActions.get(playerAgents[1].getLocalName()).equals("paper")) {
-									// TODO Is there a better approach to this?
+
 							System.out.println(playerAgents[0].getLocalName() + " wins!");
 
 							// Define the result as player 1 wins
@@ -196,7 +196,7 @@ public class MenuAgent extends Agent {
 						}
 						myGui.updateScore();
 						gameStatus = Results.SUCCESS;
-						step = 3; //TODO Define a score limit to the game
+						step = 3;
 						break;
 
 					}
@@ -234,7 +234,7 @@ public class MenuAgent extends Agent {
 
 		}
 
-		public boolean done() { // PLACEHOLDER to finish the behaviour
+		public boolean done() {
 			//process terminates here if the game is canceled or if the game is finished
 			return step == 4;
 		}

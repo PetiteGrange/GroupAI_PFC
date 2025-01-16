@@ -56,7 +56,7 @@ public class PlayerAgent extends Agent {
 	}
 
 	protected void takeDown() {
-		displayResponse("See you");
+		displayResponse(getAID().getLocalName() + ": See you");
 	}
 	public void displayResponse(String message) {
 		JOptionPane.showMessageDialog(null,message,"Message",JOptionPane.PLAIN_MESSAGE);
@@ -96,7 +96,7 @@ public class PlayerAgent extends Agent {
                 break;
         }
 		myGui.updateProbabilities();
-		System.out.println("Strategy set to: " + strategy);
+		System.out.println(getAID().getLocalName() + ": Strategy set to: " + strategy);
     }
 
 	private class GameBehaviour extends CyclicBehaviour {
@@ -121,7 +121,6 @@ public class PlayerAgent extends Agent {
 					//Handling the result of the game
 					String content = message.getContent();
 					System.out.println(myAgent.getLocalName() + " received this message: " + content);
-					//Parse string to get info about opponent action + result
 
 				} else {
 					block();
@@ -142,7 +141,7 @@ public class PlayerAgent extends Agent {
 				}
 			}
 			// Fallback (shouldn't happen if probabilities sum to 1)
-			throw new IllegalStateException("Probabilities do not sum to 1!");
+			throw new IllegalStateException(getAID().getLocalName() + ": Probabilities do not sum to 1!");
 		}
 	}
 }
