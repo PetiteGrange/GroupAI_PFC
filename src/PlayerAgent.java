@@ -25,6 +25,8 @@ public class PlayerAgent extends Agent {
 		SCISSORS, // Chooses scissors 80% of the time, rock 10%, paper 10%
 		ADAPTATIVE // Our own strategy
 	}
+	
+	private Strategy currentStrategy = Strategy.RANDOM;
 
 	protected void setup () {
 		// Initialize probabilities and opponent tracking
@@ -66,12 +68,12 @@ public class PlayerAgent extends Agent {
 	}
 
 	public void setStrategy(String strategy) {
-        // Set the probabilities based on the strategy
+		currentStrategy = Strategy.valueOf(strategy);
         switch (Strategy.valueOf(strategy)) {
             case RANDOM:
                 probabilities.put("rock", 1.0 / 3);
                 probabilities.put("paper", 1.0 / 3);
-                probabilities.put("scissors", 1.0 / 3);
+                probabilities.put("scissors", 1.0 / 3);	
                 break;
             case ROCK:
                 probabilities.put("rock", 0.8);
@@ -89,7 +91,6 @@ public class PlayerAgent extends Agent {
                 probabilities.put("scissors", 0.8);
                 break;
 			case ADAPTATIVE:
-				//TODO To merge with the strategy
 				break;
 			default:
 				System.out.println("ERROR: Unknown strategy! Defaulting to RANDOM");
@@ -195,51 +196,65 @@ public class PlayerAgent extends Agent {
 	        
 	        normalizeProbabilities(probabilities);
 	    }
+	    
+	    private void play() {
+	    	double random = Math.random();
+        	double cumulativeProbability = 0.0;
+        	for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
+            	cumulativeProbability += entry.getValue();
+            	if (random < cumulativeProbability) {
+                	return entry.getKey();
+            	}
+        	}
+        	break;
+	    }
 
 
 	    public String calculatePlayerAction() {
-	        if (turnCounter < RANDOM_TURNS) {
-	            double random = Math.random();
-	            double cumulativeProbability = 0.0;
-	            for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
-	                cumulativeProbability += entry.getValue();
-	                if (random < cumulativeProbability) {
-	                    return entry.getKey();
+	        switch (currentStrategy) {
+	            case RANDOM:play();
+	            case ROCK: play();
+	            case PAPER: play();
+	            case SCISSORS:play();
+	            
+	            case ADAPTATIVE:
+	                if (turnCounter < RANDOM_TURNS) {
+	                    play();
 	                }
-	            }
+
+	                updateProbabilities();
+	                myGui.updateProbabilities();
+
+	                double strategySelector = Math.random();
+
+	                if (strategySelector < 0.4) {
+	                    random = Math.random();
+	                    cumulativeProbability = 0.0;
+	                    for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
+	                        cumulativeProbability += entry.getValue();
+	                        if (random < cumulativeProbability) {
+	                            return entry.getKey();
+	                        }
+	                    }
+	                } else if (strategySelector < 0.7) {
+	                    String mostFrequentMove = findMostFrequentMove(opponentChoices);
+	                    switch (mostFrequentMove) {
+	                        case "rock": return "paper";
+	                        case "paper": return "scissors";
+	                        case "scissors": return "rock";
+	                    }
+	                } else {
+	                    String myMostFrequentMove = findMostFrequentMove(myChoices);
+	                    switch (myMostFrequentMove) {
+	                        case "rock": return "scissors";
+	                        case "paper": return "rock";
+	                        case "scissors": return "paper";
+	                    }
+	                }
+	                break;
 	        }
 
-	        updateProbabilities();
-			myGui.updateProbabilities();
-
-	        double strategySelector = Math.random();
-
-	        if (strategySelector < 0.4) {
-	            double random = Math.random();
-	            double cumulativeProbability = 0.0;
-	            for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
-	                cumulativeProbability += entry.getValue();
-	                if (random < cumulativeProbability) {
-	                    return entry.getKey();
-	                }
-	            }
-	        } else if (strategySelector < 0.7) {
-	            String mostFrequentMove = findMostFrequentMove(opponentChoices);
-	            switch (mostFrequentMove) {
-	                case "rock": return "paper";
-	                case "paper": return "scissors";
-	                case "scissors": return "rock";
-	            }
-	        } else {
-	            String myMostFrequentMove = findMostFrequentMove(myChoices);
-	            switch (myMostFrequentMove) {
-	                case "rock": return "scissors";
-	                case "paper": return "rock";
-	                case "scissors": return "paper";
-	            }
-	        }
-
-	        return "rock"; // Fallback par défaut
+	        return "rock"; // Default fallback
 	    }
 	}
 
