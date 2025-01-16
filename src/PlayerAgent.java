@@ -20,6 +20,7 @@ public class PlayerAgent extends Agent {
 	private String lastOpponentMove = null;
 
 	protected enum Strategy {
+		ONESHOT, // Generate probabilities once and play accordingly
 		RANDOM, // Randomly choose between rock, paper, scissors
 		ROCK, // Chooses rock 80% of the time, paper 10%, scissors 10%
 		PAPER, // Chooses paper 80% of the time, rock 10%, scissors 10%
@@ -92,6 +93,14 @@ public class PlayerAgent extends Agent {
                 probabilities.put("paper", 0.1);
                 probabilities.put("scissors", 0.8);
                 break;
+			case ONESHOT:
+				double rock = Math.random();
+				double paper = Math.random() * (1 - rock);
+				double scissors = 1 - rock - paper;
+				probabilities.put("rock", rock);
+				probabilities.put("paper", paper);
+				probabilities.put("scissors", scissors);
+				break;
 			case ADAPTATIVE:
 				break;
 			case REACTIVE:
@@ -155,6 +164,7 @@ public class PlayerAgent extends Agent {
 		private String calculatePlayerAction() {
             switch (currentStrategy) {
                 case RANDOM:
+				case ONESHOT:
                 case ROCK:
                 case PAPER:
                 case SCISSORS:
