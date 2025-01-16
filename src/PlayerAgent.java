@@ -23,7 +23,8 @@ public class PlayerAgent extends Agent {
 		ROCK, // Chooses rock 80% of the time, paper 10%, scissors 10%
 		PAPER, // Chooses paper 80% of the time, rock 10%, scissors 10%
 		SCISSORS, // Chooses scissors 80% of the time, rock 10%, paper 10%
-		ADAPTATIVE // Our own strategy
+		ADAPTATIVE, // Our own strategy
+        SHORT_ADAPTATIVE // Our own strategy, we reset the saved opponent choices after a certain number of turns
 	}
 	
 	private Strategy currentStrategy = Strategy.RANDOM;
@@ -90,9 +91,9 @@ public class PlayerAgent extends Agent {
                 probabilities.put("paper", 0.1);
                 probabilities.put("scissors", 0.8);
                 break;
-			case ADAPTATIVE:
+			case ADAPTATIVE, SHORT_ADAPTATIVE:
 				break;
-			default:
+            default:
 				System.out.println("ERROR: Unknown strategy! Defaulting to RANDOM");
 				probabilities.put("rock", 1.0 / 3);
                 probabilities.put("paper", 1.0 / 3);
@@ -150,9 +151,13 @@ public class PlayerAgent extends Agent {
                 case SCISSORS:
                     return selectBasedOnProbabilities();
 
-                case ADAPTATIVE:
+                case ADAPTATIVE, SHORT_ADAPTATIVE:
                     if (turnCounter < RANDOM_TURNS) {
                         return selectBasedOnProbabilities();
+                    }
+                    // Reset the opponent choices after a certain number of turns
+                    if (currentStrategy == Strategy.SHORT_ADAPTATIVE && turnCounter % 10 == 0) {
+                        opponentChoices.clear();
                     }
 
                     updateProbabilities();
