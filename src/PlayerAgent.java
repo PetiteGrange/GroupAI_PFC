@@ -17,13 +17,15 @@ public class PlayerAgent extends Agent {
 	private Map<String, Integer> myChoices = new HashMap<>(); //used to track our choices for bluff strategy
 	private int turnCounter = 0; // counts the number of turns played
     private static final int RANDOM_TURNS = 10; // number of turns to play randomly
+	private String lastOpponentMove = null;
 
 	protected enum Strategy {
 		RANDOM, // Randomly choose between rock, paper, scissors
 		ROCK, // Chooses rock 80% of the time, paper 10%, scissors 10%
 		PAPER, // Chooses paper 80% of the time, rock 10%, scissors 10%
 		SCISSORS, // Chooses scissors 80% of the time, rock 10%, paper 10%
-		ADAPTATIVE // Our own strategy
+		ADAPTATIVE, // Our own strategy
+		REACTIVE // Plays the counter move to the opponent's last move
 	}
 	
 	private Strategy currentStrategy = Strategy.RANDOM;
@@ -92,6 +94,11 @@ public class PlayerAgent extends Agent {
                 break;
 			case ADAPTATIVE:
 				break;
+			case REACTIVE:
+				probabilities.put("rock", 1.0 / 3);
+                probabilities.put("paper", 1.0 / 3);
+                probabilities.put("scissors", 1.0 / 3);
+				break;
 			default:
 				System.out.println("ERROR: Unknown strategy! Defaulting to RANDOM");
 				probabilities.put("rock", 1.0 / 3);
@@ -131,6 +138,9 @@ public class PlayerAgent extends Agent {
 					//Handling the result of the game
 					String content = message.getContent();
 					System.out.println(myAgent.getLocalName() + " received this message: " + content);
+
+					lastOpponentMove = content;
+
 					//Parse string to get info about opponent action + result
 					opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1); //Hashmap needs to have each move possible with the numbers of time they were played
 					
@@ -149,6 +159,9 @@ public class PlayerAgent extends Agent {
                 case PAPER:
                 case SCISSORS:
                     return selectBasedOnProbabilities();
+
+				case REACTIVE:
+					return calculateReactiveMove();
 
                 case ADAPTATIVE:
                     if (turnCounter < RANDOM_TURNS) {
@@ -183,6 +196,25 @@ public class PlayerAgent extends Agent {
             }
             return "rock"; // Fallback
         }
+
+		private String calculateReactiveMove() {
+			if (lastOpponentMove == null) {
+				// If no last move, default to random
+				System.out.println(myAgent.getLocalName() + ": REACTIVE Playing random move");
+				return selectBasedOnProbabilities();
+			}
+			switch (lastOpponentMove) {
+				case "rock":
+					return "paper"; // Paper beats rock
+				case "paper":
+					return "scissors"; // Scissors beat paper
+				case "scissors":
+					return "rock"; // Rock beats scissors
+				default:
+					System.out.println(myAgent.getLocalName() + ": REACTIVE Playing random move because incorrect move received");
+					return selectBasedOnProbabilities(); // Default to random if unknown move
+			}
+		}
 
         private String counterOpponentMostFrequent() {
             String mostFrequent = findMostFrequentMove(opponentChoices);
