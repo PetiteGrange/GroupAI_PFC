@@ -17,14 +17,17 @@ public class PlayerAgent extends Agent {
 	private Map<String, Integer> myChoices = new HashMap<>(); //used to track our choices for bluff strategy
 	private int turnCounter = 0; // counts the number of turns played
     private static final int RANDOM_TURNS = 10; // number of turns to play randomly
+	private String lastOpponentMove = null;
 
 	protected enum Strategy {
+		ONESHOT, // Generate probabilities once and play accordingly
 		RANDOM, // Randomly choose between rock, paper, scissors
 		ROCK, // Chooses rock 80% of the time, paper 10%, scissors 10%
 		PAPER, // Chooses paper 80% of the time, rock 10%, scissors 10%
 		SCISSORS, // Chooses scissors 80% of the time, rock 10%, paper 10%
 		ADAPTATIVE, // Our own strategy
-        SHORT_ADAPTATIVE // Our own strategy, we reset the saved opponent choices after a certain number of turns
+    SHORT_ADAPTATIVE // Our own strategy, we reset the saved opponent choices after a certain number of turns
+		REACTIVE // Plays the counter move to the opponent's last move
 	}
 	
 	private Strategy currentStrategy = Strategy.RANDOM;
@@ -91,9 +94,22 @@ public class PlayerAgent extends Agent {
                 probabilities.put("paper", 0.1);
                 probabilities.put("scissors", 0.8);
                 break;
+			case ONESHOT:
+				double rock = Math.random();
+				double paper = Math.random() * (1 - rock);
+				double scissors = 1 - rock - paper;
+				probabilities.put("rock", rock);
+				probabilities.put("paper", paper);
+				probabilities.put("scissors", scissors);
+				break;
 			case ADAPTATIVE, SHORT_ADAPTATIVE:
 				break;
-            default:
+			case REACTIVE:
+				probabilities.put("rock", 1.0 / 3);
+                probabilities.put("paper", 1.0 / 3);
+                probabilities.put("scissors", 1.0 / 3);
+				break;
+			default:
 				System.out.println("ERROR: Unknown strategy! Defaulting to RANDOM");
 				probabilities.put("rock", 1.0 / 3);
                 probabilities.put("paper", 1.0 / 3);
@@ -132,6 +148,9 @@ public class PlayerAgent extends Agent {
 					//Handling the result of the game
 					String content = message.getContent();
 					System.out.println(myAgent.getLocalName() + " received this message: " + content);
+
+					lastOpponentMove = content;
+
 					//Parse string to get info about opponent action + result
 					opponentChoices.put(content, opponentChoices.getOrDefault(content, 0) + 1); //Hashmap needs to have each move possible with the numbers of time they were played
 					
@@ -146,34 +165,36 @@ public class PlayerAgent extends Agent {
 		private String calculatePlayerAction() {
             switch (currentStrategy) {
                 case RANDOM:
+				case ONESHOT:
                 case ROCK:
                 case PAPER:
                 case SCISSORS:
                     return selectBasedOnProbabilities();
+				case REACTIVE:
+					return calculateReactiveMove();
+        case ADAPTATIVE, SHORT_ADAPTATIVE:
+            if (turnCounter < RANDOM_TURNS) {
+                return selectBasedOnProbabilities();
+            }
+            // Reset the opponent choices after a certain number of turns
+            if (currentStrategy == Strategy.SHORT_ADAPTATIVE && turnCounter % 10 == 0) {
+                opponentChoices.clear();
+            }
 
-                case ADAPTATIVE, SHORT_ADAPTATIVE:
-                    if (turnCounter < RANDOM_TURNS) {
-                        return selectBasedOnProbabilities();
-                    }
-                    // Reset the opponent choices after a certain number of turns
-                    if (currentStrategy == Strategy.SHORT_ADAPTATIVE && turnCounter % 10 == 0) {
-                        opponentChoices.clear();
-                    }
+            updateProbabilities();
+            myGui.updateProbabilities();
 
-                    updateProbabilities();
-                    myGui.updateProbabilities();
+            double strategySelector = Math.random();
+            if (strategySelector < 0.4) {
+                return selectBasedOnProbabilities();
+            } else if (strategySelector < 0.7) {
+                return counterOpponentMostFrequent();
+            } else {
+                return counterOwnMostFrequent();
+            }
 
-                    double strategySelector = Math.random();
-                    if (strategySelector < 0.4) {
-                        return selectBasedOnProbabilities();
-                    } else if (strategySelector < 0.7) {
-                        return counterOpponentMostFrequent();
-                    } else {
-                        return counterOwnMostFrequent();
-                    }
-
-                default:
-                    return "rock"; // Fallback
+        default:
+            return "rock"; // Fallback
             }
         }
 
@@ -188,6 +209,25 @@ public class PlayerAgent extends Agent {
             }
             return "rock"; // Fallback
         }
+
+		private String calculateReactiveMove() {
+			if (lastOpponentMove == null) {
+				// If no last move, default to random
+				System.out.println(myAgent.getLocalName() + ": REACTIVE Playing random move");
+				return selectBasedOnProbabilities();
+			}
+			switch (lastOpponentMove) {
+				case "rock":
+					return "paper"; // Paper beats rock
+				case "paper":
+					return "scissors"; // Scissors beat paper
+				case "scissors":
+					return "rock"; // Rock beats scissors
+				default:
+					System.out.println(myAgent.getLocalName() + ": REACTIVE Playing random move because incorrect move received");
+					return selectBasedOnProbabilities(); // Default to random if unknown move
+			}
+		}
 
         private String counterOpponentMostFrequent() {
             String mostFrequent = findMostFrequentMove(opponentChoices);
@@ -232,7 +272,7 @@ public class PlayerAgent extends Agent {
         }
 
         private void adjustProbabilities(String increaseKey, String decreaseKey1, String decreaseKey2) {
-            double increase = 0.01, decrease = 0.005;
+            double increase = 0.05, decrease = 0.025;
             probabilities.put(increaseKey, Math.min(probabilities.get(increaseKey) + increase, 1.0));
             probabilities.put(decreaseKey1, Math.max(probabilities.get(decreaseKey1) - decrease, 0.0));
             probabilities.put(decreaseKey2, Math.max(probabilities.get(decreaseKey2) - decrease, 0.0));
