@@ -142,120 +142,101 @@ public class PlayerAgent extends Agent {
 			}
 		}
 		
-		private void normalizeProbabilities(Map<String, Double> probabilities) {
-		    double total = probabilities.values().stream().mapToDouble(Double::doubleValue).sum();
-		    if (total > 0) {
-		        probabilities.replaceAll((key, value) -> value / total);
-		    } else {
-		        // Handle case where total is 0 (fallback to equal probabilities)
-		        int size = probabilities.size();
-		        probabilities.replaceAll((key, value) -> 1.0 / size);
-		    }
-		}
+		private String calculatePlayerAction() {
+            switch (currentStrategy) {
+                case RANDOM:
+                case ROCK:
+                case PAPER:
+                case SCISSORS:
+                    return selectBasedOnProbabilities();
 
+                case ADAPTATIVE:
+                    if (turnCounter < RANDOM_TURNS) {
+                        return selectBasedOnProbabilities();
+                    }
 
-	    private String findMostFrequentMove(Map<String, Integer> choices) {
-	        String mostFrequentMove = "rock";
-	        int maxCount = 0;
+                    updateProbabilities();
+                    myGui.updateProbabilities();
 
-	        for (Map.Entry<String, Integer> entry : choices.entrySet()) {
-	            if (entry.getValue() > maxCount) {
-	                maxCount = entry.getValue();
-	                mostFrequentMove = entry.getKey();
-	            }
-	        }
-	        return mostFrequentMove;
-	    }
-	    
-	    private void updateProbabilities() {
-	    	
-	        String mostFrequentMove = findMostFrequentMove(opponentChoices);
-	        
-	        double increase = 0.01; 
-	        double decrease = 0.005; 
-	        
-	        switch (mostFrequentMove) {
-	            case "scissors":
-	                probabilities.put("rock", Math.min(probabilities.get("rock") + increase, 1.0));
-	                probabilities.put("paper", Math.max(probabilities.get("paper") - decrease, 0.0));
-	                probabilities.put("scissors", Math.max(probabilities.get("scissors") - decrease, 0.0));
-	                break;
+                    double strategySelector = Math.random();
+                    if (strategySelector < 0.4) {
+                        return selectBasedOnProbabilities();
+                    } else if (strategySelector < 0.7) {
+                        return counterOpponentMostFrequent();
+                    } else {
+                        return counterOwnMostFrequent();
+                    }
 
-	            case "rock":
-	                probabilities.put("paper", Math.min(probabilities.get("paper") + increase, 1.0));
-	                probabilities.put("rock", Math.max(probabilities.get("rock") - decrease, 0.0));
-	                probabilities.put("scissors", Math.max(probabilities.get("scissors") - decrease, 0.0));
-	                break;
+                default:
+                    return "rock"; // Fallback
+            }
+        }
 
-	            case "paper":
-	                probabilities.put("scissors", Math.min(probabilities.get("scissors") + increase, 1.0));
-	                probabilities.put("rock", Math.max(probabilities.get("rock") - decrease, 0.0));
-	                probabilities.put("paper", Math.max(probabilities.get("paper") - decrease, 0.0));
-	                break;
-	        }
-	        
-	        normalizeProbabilities(probabilities);
-	    }
-	    
-	    private void play() {
-	    	double random = Math.random();
-        	double cumulativeProbability = 0.0;
-        	for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
-            	cumulativeProbability += entry.getValue();
-            	if (random < cumulativeProbability) {
-                	return entry.getKey();
-            	}
-        	}
-        	break;
-	    }
+        private String selectBasedOnProbabilities() {
+            double random = Math.random();
+            double cumulativeProbability = 0.0;
+            for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
+                cumulativeProbability += entry.getValue();
+                if (random < cumulativeProbability) {
+                    return entry.getKey();
+                }
+            }
+            return "rock"; // Fallback
+        }
 
+        private String counterOpponentMostFrequent() {
+            String mostFrequent = findMostFrequentMove(opponentChoices);
+            switch (mostFrequent) {
+                case "rock": return "paper";
+                case "paper": return "scissors";
+                case "scissors": return "rock";
+                default: return "rock";
+            }
+        }
 
-	    public String calculatePlayerAction() {
-	        switch (currentStrategy) {
-	            case RANDOM:play();
-	            case ROCK: play();
-	            case PAPER: play();
-	            case SCISSORS:play();
-	            
-	            case ADAPTATIVE:
-	                if (turnCounter < RANDOM_TURNS) {
-	                    play();
-	                }
+        private String counterOwnMostFrequent() {
+            String mostFrequent = findMostFrequentMove(myChoices);
+            switch (mostFrequent) {
+                case "rock": return "scissors";
+                case "paper": return "rock";
+                case "scissors": return "paper";
+                default: return "rock";
+            }
+        }
 
-	                updateProbabilities();
-	                myGui.updateProbabilities();
+        private String findMostFrequentMove(Map<String, Integer> choices) {
+            return choices.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("rock");
+        }
 
-	                double strategySelector = Math.random();
+        private void updateProbabilities() {
+            String mostFrequent = findMostFrequentMove(opponentChoices);
+            switch (mostFrequent) {
+                case "rock":
+                    adjustProbabilities("paper", "scissors", "rock");
+                    break;
+                case "paper":
+                    adjustProbabilities("scissors", "rock", "paper");
+                    break;
+                case "scissors":
+                    adjustProbabilities("rock", "paper", "scissors");
+                    break;
+            }
+        }
 
-	                if (strategySelector < 0.4) {
-	                    random = Math.random();
-	                    cumulativeProbability = 0.0;
-	                    for (Map.Entry<String, Double> entry : probabilities.entrySet()) {
-	                        cumulativeProbability += entry.getValue();
-	                        if (random < cumulativeProbability) {
-	                            return entry.getKey();
-	                        }
-	                    }
-	                } else if (strategySelector < 0.7) {
-	                    String mostFrequentMove = findMostFrequentMove(opponentChoices);
-	                    switch (mostFrequentMove) {
-	                        case "rock": return "paper";
-	                        case "paper": return "scissors";
-	                        case "scissors": return "rock";
-	                    }
-	                } else {
-	                    String myMostFrequentMove = findMostFrequentMove(myChoices);
-	                    switch (myMostFrequentMove) {
-	                        case "rock": return "scissors";
-	                        case "paper": return "rock";
-	                        case "scissors": return "paper";
-	                    }
-	                }
-	                break;
-	        }
+        private void adjustProbabilities(String increaseKey, String decreaseKey1, String decreaseKey2) {
+            double increase = 0.01, decrease = 0.005;
+            probabilities.put(increaseKey, Math.min(probabilities.get(increaseKey) + increase, 1.0));
+            probabilities.put(decreaseKey1, Math.max(probabilities.get(decreaseKey1) - decrease, 0.0));
+            probabilities.put(decreaseKey2, Math.max(probabilities.get(decreaseKey2) - decrease, 0.0));
+            normalizeProbabilities();
+        }
 
-	        return "rock"; // Default fallback
-	    }
+        private void normalizeProbabilities() {
+            double total = probabilities.values().stream().mapToDouble(Double::doubleValue).sum();
+            probabilities.replaceAll((key, value) -> value / total);
+        }
 	}
-
 }
