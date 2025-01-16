@@ -68,8 +68,8 @@ class PlayerAgentGui extends JFrame {
         strategyComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String selectedStrategy = (String) strategyComboBox.getSelectedItem();
-                myAgent.setStrategy(selectedStrategy);
+                Strategy selectedStrategy = (Strategy) strategyComboBox.getSelectedItem();
+                myAgent.setStrategy(selectedStrategy.name());
             }
         });
         gbc.gridx = 0;

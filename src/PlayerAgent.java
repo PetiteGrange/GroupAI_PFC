@@ -62,7 +62,7 @@ public class PlayerAgent extends Agent {
 		JOptionPane.showMessageDialog(null,message,"Message",JOptionPane.PLAIN_MESSAGE);
 	}
 
-	public void setStrategy(Strategy strategy) { //TODO THERE IS A BUG THERE BUT DUNNO HOW TO FIX
+	public void setStrategy(String strategy) {
         // Set the probabilities based on the strategy
         switch (Strategy.valueOf(strategy)) {
             case RANDOM:
