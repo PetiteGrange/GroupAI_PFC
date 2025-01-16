@@ -269,7 +269,7 @@ public class PlayerAgent extends Agent {
         }
 
         private void adjustProbabilities(String increaseKey, String decreaseKey1, String decreaseKey2) {
-            double increase = 0.01, decrease = 0.005;
+            double increase = 0.05, decrease = 0.025;
             probabilities.put(increaseKey, Math.min(probabilities.get(increaseKey) + increase, 1.0));
             probabilities.put(decreaseKey1, Math.max(probabilities.get(decreaseKey1) - decrease, 0.0));
             probabilities.put(decreaseKey2, Math.max(probabilities.get(decreaseKey2) - decrease, 0.0));
