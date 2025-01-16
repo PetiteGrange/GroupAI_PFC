@@ -56,7 +56,7 @@ public class PlayerAgent extends Agent {
 	}
 
 	protected void takeDown() {
-		displayResponse("See you");
+		displayResponse(getAID().getLocalName() + ": See you");
 	}
 	public void displayResponse(String message) {
 		JOptionPane.showMessageDialog(null,message,"Message",JOptionPane.PLAIN_MESSAGE);
@@ -96,7 +96,7 @@ public class PlayerAgent extends Agent {
                 break;
         }
 		myGui.updateProbabilities();
-		System.out.println("Strategy set to: " + strategy);
+		System.out.println(getAID().getLocalName() + ": Strategy set to: " + strategy);
     }
 
 	private class GameBehaviour extends CyclicBehaviour {
