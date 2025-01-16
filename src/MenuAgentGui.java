@@ -34,7 +34,7 @@ public class MenuAgentGui extends JFrame {
         gbc.gridx = 0;
         p.add(new JLabel("Rounds to play:"), gbc);
 
-        roundsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 15, 1)); // Default: 1, Min: 1, Max: 15, Step: 1
+        roundsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1)); // Default: 1, Min: 1, Max: 100, Step: 1
         gbc.gridx = 1;
         p.add(roundsSpinner, gbc);
 
