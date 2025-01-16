@@ -80,7 +80,7 @@ public class MenuAgentGui extends JFrame {
 
         // Add panel to frame
         getContentPane().add(p);
-        this.setSize(250, 220);
+        this.setSize(250, 300);
     }
 
     public void updateScore() {

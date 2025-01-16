@@ -65,6 +65,7 @@ class PlayerAgentGui extends JFrame {
 
         // Combobox for strategy
         strategyComboBox = new JComboBox<>(Strategy.values());
+        //strategyComboBox.setPreferredSize(new Dimension(200, 25));
         strategyComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -74,6 +75,7 @@ class PlayerAgentGui extends JFrame {
         });
         gbc.gridx = 0;
         gbc.gridy = 4;
+        gbc.gridwidth = 2;
         p.add(strategyComboBox, gbc);
 
         // Add panel to frame
